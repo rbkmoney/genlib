@@ -2,7 +2,7 @@ APPNAME = genlib
 REBAR ?= $(shell which rebar 2>/dev/null || which ./rebar)
 DIALYZER = dialyzer
 
-.PHONY: all compile deps clean distclean eunit release deploy
+.PHONY: all compile deps clean distclean eunit
 
 all: compile
 
