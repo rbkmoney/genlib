@@ -1,0 +1,21 @@
+{
+    "folders":
+    [
+        {
+            "path": ".",
+            "folder_exclude_patterns": [ "*.eunit", "log", "logs", "ebin", "plts", "rel_build" ],
+            "file_exclude_patterns"  : [ ".tags*", "gproc_dist*", "erl_crash.dump" ]
+        }
+    ],
+    "settings":
+    {
+        "tab_size": 4
+    },
+    "build_systems":
+    [
+        {
+            "name": "make-develop",
+            "cmd": ["make", "dc"]
+        }
+    ]
+}

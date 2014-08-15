@@ -1,0 +1,16 @@
+log
+logs
+ebin
+deps
+*~
+*.beam
+erl_crash.dump
+.eunit
+plts
+dev.config
+rel/gate
+rel_build
+gproc_dist*
+.tags*
+*.sublime-workspace
+.DS_Store

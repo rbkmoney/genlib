@@ -1,0 +1,9 @@
+{application, genlib, [
+    {description, "A collection of general implementations of common activities"},
+    {vsn, "0.1"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]}
+]}.
