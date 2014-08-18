@@ -831,9 +831,6 @@ print_terms_without_format_string_test() ->
         chomp = false
     }).
 
-format_(FmtStr, Args, MaxLen) ->
-    format_(FmtStr, Args, MaxLen, []).
-
 format_([], [], _, _) ->
     "";
 format_(FmtStr, Args, MaxLen, Opts) when is_atom(FmtStr) ->
