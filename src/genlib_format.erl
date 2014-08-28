@@ -12,6 +12,8 @@
 -export([format_datetime_iso8601_tz/2]).
 
 -export([format_peer/1]).
+-export([format_stacktrace/1]).
+-export([format_stacktrace/2]).
 
 -export([binary_to_hex/1]).
 -export([binary_to_hex/2]).
@@ -136,6 +138,71 @@ format_peer({IP, Port}) ->
 
 ntoa(IP) ->
     list_to_binary(inet:ntoa(IP)).
+
+%%
+
+-spec format_stacktrace([erlang:stack_item()]) -> binary().
+
+format_stacktrace(Trace) ->
+    format_stacktrace(Trace, []).
+
+-spec format_stacktrace([erlang:stack_item()], Opts :: [newlines]) -> binary().
+
+format_stacktrace(Trace, Opts) ->
+    try format_stacktrace(Trace, lists:member(newlines, Opts), <<>>) catch
+        _:_ -> genlib:print(Trace, 640)
+    end.
+
+-define(MAX_ARGLIST_LENGTH, 64).
+
+format_stacktrace([], _Opts, Acc) ->
+    Acc;
+
+format_stacktrace([{Module, Function, As, Opts} | Rest], Nl, Acc) ->
+    I = case Acc of
+        <<>>      -> <<"in call to">>;
+        _ when Nl -> <<$\t, "called from">>;
+        _         -> <<"called from">>
+    end,
+    E = case Rest of
+        []                -> <<>>;
+        _ when Nl         -> <<$\n>>;
+        _                 -> <<",", $\s>>
+    end,
+    M = atom_to_binary(Module, utf8),
+    F = atom_to_binary(Function, utf8),
+    Acc1 = <<Acc/binary, I/binary, " ", M/binary, ":", F/binary>>,
+    Acc2 = format_args(As, Acc1),
+    Acc3 = format_site(Opts, Acc2),
+    format_stacktrace(Rest, Nl, <<Acc3/binary, E/binary>>).
+
+format_args(Args, Acc) when is_list(Args) ->
+    case genlib:print(Args, ?MAX_ARGLIST_LENGTH) of
+        R when byte_size(R) =:= ?MAX_ARGLIST_LENGTH ->
+            <<_, R0/binary>> = R,
+            <<Acc/binary, "(", R0/binary, ")">>;
+        R ->
+            R0 = binary:part(R, 1, byte_size(R) - 2),
+            <<Acc/binary, "(", R0/binary, ")">>
+    end;
+
+format_args(Arity, Acc) when is_integer(Arity) ->
+    <<Acc/binary, $/, (integer_to_binary(Arity))/binary>>.
+
+format_site(Opts, Acc) ->
+    format_site(genlib_opts:get(file, Opts), genlib_opts:get(line, Opts), Acc).
+
+format_site(undefined, _, Acc) ->
+    Acc;
+
+format_site(Filename, undefined, Acc) ->
+    F = genlib:to_binary(Filename),
+    <<Acc/binary, " at ", F/binary>>;
+
+format_site(Filename, Line, Acc) ->
+    F = genlib:to_binary(Filename),
+    L = integer_to_binary(Line),
+    <<Acc/binary, " at ", F/binary, ":", L/binary>>.
 
 %%
 
