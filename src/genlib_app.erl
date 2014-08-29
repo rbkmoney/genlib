@@ -24,6 +24,7 @@
     test_application_start/1,
     test_application_stop/1,
 
+    env/1,
     env/2,
     env/3
 
@@ -171,6 +172,11 @@ restore_app_env(App) ->
     end.
 
 %%
+
+-spec env(Application :: atom()) -> genlib_opts:opts().
+
+env(App) ->
+    application:get_all_env(App).
 
 -spec env(Application :: atom(), Key :: atom()) -> term() | undefined.
 
