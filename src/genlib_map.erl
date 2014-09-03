@@ -7,6 +7,7 @@
 
 -export([get/2]).
 -export([get/3]).
+-export([mget/2]).
 -export([foreach/2]).
 -export([truemap/2]).
 -export([compact/1]).
@@ -32,6 +33,19 @@ get(Key, Map = #{}, Default) ->
         _ ->
             Default
     end.
+
+-spec mget([Key | {Key, Default}], map()) -> [Default | term()] when
+    Key :: atom() | binary() | number(),
+    Default :: term().
+
+mget([{Key, Default} | Rest], Map) ->
+    [get(Key, Map, Default) | mget(Rest, Map)];
+
+mget([Key | Rest], Map) ->
+    [get(Key, Map) | mget(Rest, Map)];
+
+mget([], _Map) ->
+    [].
 
 -spec truemap(Function, map()) -> ok when
     Function :: fun((Key :: any(), Value :: any()) -> {Key :: any(), Value :: any()}).
