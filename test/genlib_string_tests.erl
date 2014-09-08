@@ -30,3 +30,10 @@ snakecase_test_() ->
         ?_assertEqual(<<"payer_e_wallet">>        , genlib_string:to_snakecase(<<"PayerEWallet">>)),
         ?_assertEqual(<<"payer_cash">>            , genlib_string:to_snakecase(<<"PayerCash">>))
     ].
+
+join_test_() ->
+    [
+        ?_assertEqual(<<"foo!bar!z">>             , genlib_string:join($!, ["foo", <<"bar">>, $z])),
+        ?_assertEqual(<<"a:=:b:=:c:=:d:=:e:=:f">> , genlib_string:join(<<":=:">>, lists:seq($a, $f))),
+        ?_assertError(_                           , genlib_string:join($:, []))
+    ].

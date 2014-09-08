@@ -99,14 +99,14 @@ cat(Badarg) ->
 
 -spec join(char() | iodata(), [iodata(), ...]) -> binary().
 
-join(Delim, [H | T]) ->
-    iolist_to_binary([H | join_(Delim, T)]).
+join(Delim, List) ->
+    iolist_to_binary(join_(Delim, List)).
 
-join_(_, []) ->
-    [];
+join_(_, [H]) ->
+    [H];
 
 join_(Delim, [H | T]) ->
-    [[Delim | H] | join_(Delim, T)].
+    [H, Delim | join_(Delim, T)].
 
 -spec to_lower(binary()) -> binary().
 
