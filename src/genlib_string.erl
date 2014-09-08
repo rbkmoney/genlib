@@ -15,6 +15,8 @@
 -export([cat/2]).
 -export([cat/1]).
 
+-export([join/2]).
+
 -export([to_lower/1]).
 -export([to_upper/1]).
 -export([to_snakecase/1]).
@@ -79,18 +81,32 @@ trim_right(S, N) ->
             S
     end.
 
--spec cat(binary(), binary()) -> binary().
+-spec cat(iodata(), iodata()) -> binary().
+
+cat(S1, S2) when is_binary(S1), is_binary(S2) ->
+    <<S1/binary, S2/binary>>;
 
 cat(S1, S2) ->
-    <<S1/binary, S2/binary>>.
+    cat(iolist_to_binary(S1), iolist_to_binary(S2)).
 
--spec cat([binary(), ...]) -> binary().
+-spec cat([iodata(), ...]) -> binary().
 
 cat([S | Ss]) ->
     lists:foldl(fun cat/2, S, Ss);
 
 cat(Badarg) ->
     error(badarg, [Badarg]).
+
+-spec join(char() | iodata(), [iodata(), ...]) -> binary().
+
+join(Delim, [H | T]) ->
+    iolist_to_binary([H | join_(Delim, T)]).
+
+join_(_, []) ->
+    [];
+
+join_(Delim, [H | T]) ->
+    [[Delim | H] | join_(Delim, T)].
 
 -spec to_lower(binary()) -> binary().
 
