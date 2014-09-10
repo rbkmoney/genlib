@@ -23,8 +23,8 @@
 -export([round/2]).
 
 %%
--type weighted_data() :: [{term(), pos_integer()}].
 
+-type weighted_data() :: [{term(), pos_integer()}].
 
 -spec to_binary(iodata() | atom() | number()) -> binary().
 
@@ -75,6 +75,7 @@ print(Arg, _Limit) when is_binary(Arg) ->
 
 print(Arg, Limit) ->
     print(iolist_to_binary(genlib_trunc_io:fprint(Arg, Limit)), Limit).
+
 %%
 
 -spec unique() -> binary().
