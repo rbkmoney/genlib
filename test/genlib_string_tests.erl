@@ -34,6 +34,7 @@ snakecase_test_() ->
 join_test_() ->
     [
         ?_assertEqual(<<"foo!bar!z">>             , genlib_string:join($!, ["foo", <<"bar">>, $z])),
+        ?_assertEqual(<<"foo bar z">>             , genlib_string:join(["foo", <<"bar">>, $z])),
         ?_assertEqual(<<"a:=:b:=:c:=:d:=:e:=:f">> , genlib_string:join(<<":=:">>, lists:seq($a, $f))),
         ?_assertError(_                           , genlib_string:join($:, []))
     ].

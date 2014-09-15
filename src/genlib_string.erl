@@ -15,6 +15,7 @@
 -export([cat/2]).
 -export([cat/1]).
 
+-export([join/1]).
 -export([join/2]).
 
 -export([to_lower/1]).
@@ -96,6 +97,11 @@ cat([S | Ss]) ->
 
 cat(Badarg) ->
     error(badarg, [Badarg]).
+
+-spec join([iodata(), ...]) -> binary().
+
+join(List) ->
+    join($\s, List).
 
 -spec join(char() | iodata(), [iodata(), ...]) -> binary().
 
