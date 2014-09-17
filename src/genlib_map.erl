@@ -7,6 +7,7 @@
 
 -export([get/2]).
 -export([get/3]).
+-export([deepput/3]).
 -export([mget/2]).
 -export([foreach/2]).
 -export([truemap/2]).
@@ -46,6 +47,14 @@ mget([Key | Rest], Map) ->
 
 mget([], _Map) ->
     [].
+
+-spec deepput(KeyPath :: [term()], Value :: term(), map()) -> map().
+
+deepput([Key], Value, Map) ->
+    maps:put(Key, Value, Map);
+
+deepput([Key | Rest], Value, Map) ->
+    maps:put(Key, deepput(Rest, Value, get(Key, Map, #{})), Map).
 
 -spec truemap(Function, map()) -> ok when
     Function :: fun((Key :: any(), Value :: any()) -> {Key :: any(), Value :: any()}).

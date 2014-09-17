@@ -19,3 +19,13 @@ truemap_test_() ->
     [
         ?_assertEqual(InvMap, genlib_map:truemap(fun (K, V) -> {V, K} end, Map))
     ].
+
+deepput_test_() ->
+    [
+        ?_assertError(_, genlib_map:deepput(answ, 42, #{})),
+        ?_assertEqual(#{answ => 42, foo => fighters}, genlib_map:deepput([answ], 42, #{foo => fighters})),
+        ?_assertEqual(
+            #{$b => #{$a => #{$n => #{$j => #{$o => 42}}}}, ba => zinga},
+            genlib_map:deepput("banjo", 42, #{ba => zinga})
+        )
+    ].
