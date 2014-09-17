@@ -92,8 +92,8 @@ cat(S1, S2) ->
 
 -spec cat([iodata(), ...]) -> binary().
 
-cat([S | Ss]) ->
-    lists:foldl(fun cat/2, S, Ss);
+cat(Ss = [_ | _]) ->
+    iolist_to_binary(Ss);
 
 cat(Badarg) ->
     error(badarg, [Badarg]).
