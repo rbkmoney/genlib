@@ -7,9 +7,16 @@
 -export([parse_int_base/2]).
 
 -export([format_date/2]).
+
 -export([format_datetime/2]).
 -export([format_datetime_iso8601/1]).
+-export([format_datetime_iso8601_local_tz/1]).
 -export([format_datetime_iso8601_tz/2]).
+
+-export([format_timestamp/2]).
+-export([format_timestamp_iso8601/1]).
+-export([format_timestamp_iso8601_local_tz/1]).
+-export([format_timestamp_iso8601_tz/2]).
 
 -export([format_peer/1]).
 -export([format_stacktrace/1]).
@@ -100,7 +107,12 @@ format_datetime_iso8601(Datetime) ->
     Part = format_datetime_iso8601_(Datetime),
     <<Part/binary, $Z>>.
 
--spec format_datetime_iso8601_tz(datetime(), Timezone :: {'-' | '+', 0..12, 0..59}) -> binary().
+-spec format_datetime_iso8601_local_tz(datetime()) -> binary().
+
+format_datetime_iso8601_local_tz(Datetime) ->
+    format_datetime_iso8601_tz(Datetime, genlib_time:get_timezone()).
+
+-spec format_datetime_iso8601_tz(datetime(), genlib_time:tzoffset()) -> binary().
 
 format_datetime_iso8601_tz(Datetime, {Sign, H, M}) ->
     Part = format_datetime_iso8601_(Datetime),
@@ -125,6 +137,28 @@ format_datetime_part(s       , {_, {_, _, S}}, Bin) -> ?cat(genlib_string:pad_nu
 format_datetime_part(Bin    , _DateTime, Bin) when is_binary(Bin)   -> ?cat(Bin);
 format_datetime_part(String , _DateTime, Bin) when is_list(String)  -> ?cat(list_to_binary(String));
 format_datetime_part(Char   , _DateTime, Bin) when is_integer(Char) -> <<Bin/binary, Char>>.
+
+%%
+
+-spec format_timestamp(format(), genlib_time:ts()) -> binary().
+
+format_timestamp(Format, Ts) ->
+    format_datetime(Format, genlib_time:unixtime_to_daytime(Ts)).
+
+-spec format_timestamp_iso8601(genlib_time:ts()) -> binary().
+
+format_timestamp_iso8601(Ts) ->
+    format_datetime_iso8601(genlib_time:unixtime_to_daytime(Ts)).
+
+-spec format_timestamp_iso8601_local_tz(genlib_time:ts()) -> binary().
+
+format_timestamp_iso8601_local_tz(Ts) ->
+    format_datetime_iso8601_local_tz(genlib_time:unixtime_to_daytime(Ts)).
+
+-spec format_timestamp_iso8601_tz(genlib_time:ts(), genlib_time:tzoffset()) -> binary().
+
+format_timestamp_iso8601_tz(Ts, Tz) ->
+    format_datetime_iso8601_tz(genlib_time:unixtime_to_daytime(Ts), Tz).
 
 %%
 
@@ -273,7 +307,7 @@ parse_datetime_iso8601(Bin) ->
     {[Year, Month, Day, Hour, Minute, Second], <<>>} = parse_numeric(Format, Bin),
     {{Year, Month, Day}, {Hour, Minute, Second}}.
 
--spec parse_datetime_iso8601_tz(binary()) -> {datetime(), Timezone :: {'-' | '+', 0..12, 0..59}}.
+-spec parse_datetime_iso8601_tz(binary()) -> {datetime(), genlib_time:tzoffset()}.
 
 parse_datetime_iso8601_tz(Bin) ->
     Format = [4, <<$->>, 2, <<$->>, 2, <<$T>>, 2, <<$:>>, 2, <<$:>>, 2],

@@ -17,6 +17,22 @@ datetime_test_() ->
         ?_assertEqual(<<"17/01/89">>, genlib_format:format_date([dd, $/, mm, $/, yy], {1989, 1, 17}))
     ].
 
+iso8601_test_() ->
+    Datetime = calendar:local_time(),
+    SysDatetime = os:cmd("date +%Y-%m-%dT%H:%M:%SZ"),
+    Subject = list_to_binary(lists:sublist(SysDatetime, length(SysDatetime) - 1)),
+    [
+        ?_assertEqual(Subject, genlib_format:format_datetime_iso8601(Datetime)),
+        ?_assertEqual(<<"2012-12-22T00:04:33Z">>, genlib_format:format_datetime_iso8601({{2012, 12, 22}, {0, 4, 33}})),
+        ?_assertEqual(<<"2012-12-22T04:34:33+04:30">>, genlib_format:format_datetime_iso8601_tz({{2012, 12, 22}, {4, 34, 33}}, {'+', 4, 30}))
+    ].
+
+timestamp_test_() ->
+    [
+        ?_assertEqual(<<"2012-12-22T00:04:33Z">>, genlib_format:format_timestamp_iso8601(1356134673)),
+        ?_assertEqual(<<"2012-12-22T04:34:33+04:30">>, genlib_format:format_timestamp_iso8601_tz(1356150873, {'+', 4, 30}))
+    ].
+
 stacktrace_test_() ->
     [
         ?_assertMatch(
