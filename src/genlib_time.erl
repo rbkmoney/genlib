@@ -37,8 +37,10 @@
 -define(EPOCH_DIFF, 62167219200).
 
 -type ts() :: pos_integer().
+-type tzoffset() :: {'-' | '+', 0..12, 0..59}.
 
 -export_type([ts/0]).
+-export_type([tzoffset/0]).
 
 %%
 
@@ -151,7 +153,7 @@ duration_to_seconds({D, H, M, S}) -> duration_to_seconds({D * 24 + H, M, S}).
 
 %%
 
--spec get_timezone() -> {'-' | '+', 0..12, 0..59}.
+-spec get_timezone() -> tzoffset().
 
 get_timezone() ->
     {ok, [Sign, H, M], []} = io_lib:fread("~1s~2d~2d\n", os:cmd("date +%z")),
