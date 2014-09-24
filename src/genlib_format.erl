@@ -214,7 +214,10 @@ format_args(Args, Acc) when is_list(Args) ->
     case genlib:print(Args, ?MAX_ARGLIST_LENGTH) of
         R when byte_size(R) =:= ?MAX_ARGLIST_LENGTH ->
             <<_, R0/binary>> = R,
-            <<Acc/binary, "(", R0/binary, ")">>;
+            case binary:last(R0) of
+                $. -> <<Acc/binary, "(", R0/binary, ")">>;
+                _ -> <<Acc/binary, "(", R0/binary, "...)">>
+            end;
         R ->
             R0 = binary:part(R, 1, byte_size(R) - 2),
             <<Acc/binary, "(", R0/binary, ")">>
