@@ -126,7 +126,7 @@ start_application(AppName) ->
             [AppName];
         {error, {already_started, AppName}} ->
             [];
-        {error, {not_started, DepName}} ->
+        {error, {Status, DepName}} when Status =:= not_started; Status =:= not_running ->
             start_application(DepName) ++ start_application(AppName);
         {error, Reason} ->
             exit(Reason)
@@ -137,7 +137,6 @@ start_application(AppName) ->
 
 start_application_with(App, Env) ->
     _ = application:load(App),
-    _ = save_app_env(App),
     _ = set_app_env(App, Env),
     start_application(App).
 
@@ -150,7 +149,7 @@ test_application_start(App) ->
 -spec test_application_stop([Application :: atom()]) -> ok.
 
 test_application_stop(Apps) ->
-    _ = [begin application:stop(App), catch restore_app_env(App) end || App <- lists:reverse(Apps)],
+    _ = [application:stop(App) || App <- lists:reverse(Apps)],
     ok.
 
 set_app_env(App, Env) ->
