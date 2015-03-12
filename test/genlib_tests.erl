@@ -30,10 +30,25 @@ dice_roll_test() ->
     WSum = lists:foldl(fun ({_, W}, Acc) -> Acc + W end, 0, Data),
     ?assert(abs(Average - S / WSum) < 1).
 
-print_test() ->
-    ?assertMatch(<<"My hat">>, genlib:print(<<"My hate is for you, bastard!">>, 6)),
-    ?assert(byte_size(genlib:print(<<"qwertysferferferfecefefegergeferfwdwfwfegwfgegr">>, 4)) =< 4),
-    ?assert(byte_size(genlib:print({test, test, [lol, dance, "madness", <<"hehe">>]}, 2)) =< 2 ).
+print_test_() ->
+    [
+        ?_assertMatch(<<"My hat">>, genlib:print(<<"My hate is for you, bastard!">>, 6)),
+        ?_assert(byte_size(genlib:print(<<"qwertysferferferfecefefegergeferfwdwfwfegwfgegr">>, 4)) =< 4),
+        ?_assert(byte_size(genlib:print({test, test, [lol, dance, "madness", <<"hehe">>]}, 2)) =< 2 ),
+        ?_assert(byte_size(genlib:print(<<"ДВЕРЬ МНЕ ЗаПиЛи"/utf8>>, 21)) =< 21)
+    ].
+
+format_test_() ->
+    [
+        ?_assertEqual(
+            <<"Something something, roses are red">>,
+            genlib:format("Something something, ~p are ~ts", [roses, "red"])
+        ),
+        ?_assertEqual(
+            <<"аƒањасиў Љыђ ( ͡° ͜ʖ ͡°) и 42"/utf8>>,
+            genlib:format("аƒањасиў Љыђ ~ts и ~B", [<<"( ͡° ͜ʖ ͡°)"/utf8>>, 42])
+        )
+    ].
 %%
 
 random_in(A, B) ->
