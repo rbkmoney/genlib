@@ -6,6 +6,8 @@
 -export([format_int_base/2]).
 -export([parse_int_base/2]).
 
+-export([format_decimal/2]).
+
 -export([format_date/2]).
 
 -export([format_datetime/2]).
@@ -77,6 +79,22 @@ parse_int_base(<<D, Bin/binary>>, Base, R0) ->
         D >= $A -> D - $A + 10;
         true    -> D - $0
     end).
+
+%%
+
+-spec format_decimal(integer(), Exponent :: non_neg_integer()) -> binary().
+
+format_decimal(N, 0) when is_integer(N) ->
+    integer_to_binary(N);
+
+format_decimal(N, Exp) when is_integer(N), is_integer(Exp), Exp > 0 ->
+    S0 = integer_to_binary(N),
+    S1 = genlib_string:pad_left(S0, $0, max(byte_size(S0), Exp + 1)),
+    {S2, S3} = split_binary(S1, byte_size(S1) - Exp),
+    <<S2/binary, $., S3/binary>>;
+
+format_decimal(_, _) ->
+    error(badarg).
 
 %%
 

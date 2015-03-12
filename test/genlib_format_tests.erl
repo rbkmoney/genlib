@@ -57,3 +57,12 @@ stacktrace_test_() ->
             )
         )
     ].
+
+decimal_test_() ->
+    [
+        ?_assertEqual(<<"4242">>, genlib_format:format_decimal(4242, 0)),
+        ?_assertEqual(<<"424.2">>, genlib_format:format_decimal(4242, 1)),
+        ?_assertEqual(<<"0.00000007">>, genlib_format:format_decimal(7, 8)),
+        ?_assertError(badarg, genlib_format:format_decimal(42, -1)),
+        ?_assertError(badarg, genlib_format:format_decimal("42", 42))
+    ].
