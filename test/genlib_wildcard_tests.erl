@@ -35,3 +35,11 @@ match_test_() ->
             {{<<"abc11">>, <<"abc\\*">>}, false}
         ]
     ).
+
+unicode_test_() ->
+    [
+        ?_assertEqual(true, genlib_wildcard:match(<<"Казалось бы, но нет"/utf8>>, <<"*">>)),
+        ?_assertEqual(true, genlib_wildcard:match(<<"Казалось бы, но нет"/utf8>>, <<"Казалось б?, *"/utf8>>)),
+        ?_assertEqual(false, genlib_wildcard:match(<<"Казалось бы, но нет"/utf8>>, <<"Казалось б??, *"/utf8>>)),
+        ?_assertEqual(true, genlib_wildcard:match(<<"Казалось бы? Nope"/utf8>>, <<"Казалось б?\\?*"/utf8>>))
+    ].
