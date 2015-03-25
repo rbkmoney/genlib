@@ -16,6 +16,7 @@
 -export([atomize/2]).
 -export([binarize/1]).
 -export([binarize/2]).
+-export([diff/2]).
 
 %%
 
@@ -105,3 +106,8 @@ binarize(Map, N) ->
 
 decrement(infinity) -> infinity;
 decrement(N) -> N - 1.
+
+-spec diff(#{}, Since :: #{}) -> Diff :: #{}.
+
+diff(Map, Since) ->
+    maps:fold(fun (K, V, M) -> case get(K, M, make_ref()) of V -> maps:remove(K, M); _ -> M end end, Map, Since).

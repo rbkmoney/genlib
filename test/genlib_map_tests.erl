@@ -29,3 +29,14 @@ deepput_test_() ->
             genlib_map:deepput("banjo", 42, #{ba => zinga})
         )
     ].
+
+diff_test_() ->
+    Map = #{hey => "oh", listen => "what", i => "say oh", come => "back and..."},
+    [
+        ?_assertEqual(#{}, genlib_map:diff(Map, Map)),
+        ?_assertEqual(Map, genlib_map:diff(Map, #{})),
+        ?_assertEqual(#{poo => hoo}, genlib_map:diff(Map#{poo => hoo}, Map)),
+        ?_assertEqual(#{hey => hoo}, genlib_map:diff(Map#{hey => hoo}, Map)),
+        ?_assertEqual(#{this_is => 'undefined'}, genlib_map:diff(#{this_is => 'undefined'}, #{this_is => 'not'})),
+        ?_assertEqual(#{this_is => 'not'      }, genlib_map:diff(#{this_is => 'not'}, #{this_is => 'undefined'}))
+    ].
