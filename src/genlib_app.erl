@@ -121,7 +121,7 @@ priv_path(AppName, Relative) ->
     Application :: atom().
 
 start_application(AppName) ->
-    case application:start(AppName) of
+    case application:start(AppName, permanent) of
         ok ->
             [AppName];
         {error, {already_started, AppName}} ->
