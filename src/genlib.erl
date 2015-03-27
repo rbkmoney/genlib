@@ -8,6 +8,7 @@
 -export([to_binary/1]).
 -export([to_list/1]).
 -export([to_float/1]).
+-export([to_int/1]).
 
 -export([format/1]).
 -export([format/2]).
@@ -54,6 +55,16 @@ to_float(V) ->
 
 %%
 
+-spec to_int(integer() | binary() | list()) -> integer().
+
+to_int(Data) when is_integer(Data) ->
+    Data;
+to_int(Data) when is_binary(Data) ->
+    binary_to_integer(Data);
+to_int(Data) when is_list(Data) ->
+    list_to_integer(Data).
+    
+
 -spec format(term()) -> binary().
 
 format(Arg) ->
@@ -62,7 +73,7 @@ format(Arg) ->
 -spec format(string(), list()) -> binary().
 
 format(Format, Args) ->
-    unicode:characters_to_binary(io_lib:format(Format, Args)).
+    iolist_to_binary(io_lib:format(Format, Args)).
 
 -spec print(term(), pos_integer()) -> binary().
 
@@ -74,7 +85,7 @@ print(Arg, _Limit) when is_binary(Arg) ->
     Arg;
 
 print(Arg, Limit) ->
-    print(unicode:characters_to_binary(genlib_trunc_io:fprint(Arg, Limit)), Limit).
+    print(iolist_to_binary(genlib_trunc_io:fprint(Arg, Limit)), Limit).
 
 %%
 
