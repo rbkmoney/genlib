@@ -4,6 +4,8 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-define(assertNear(E, N, Eps), ?assert((E - Eps < N) and (N < E + Eps))).
+
 %%
 
 linear_test() ->
@@ -19,6 +21,27 @@ exponential_test() ->
     {wait, 128, R3} = genlib_retry:next_step(R2),
     {wait, 256, R4} = genlib_retry:next_step(R3),
     finish = genlib_retry:next_step(R4).
+
+timecap_test() ->
+    R1 = genlib_retry:timecap(1500, genlib_retry:exponential(infinity, 2, 50, 500)),
+    ok = timer:sleep(10),
+    {wait, N1, R2} = genlib_retry:next_step(R1), % ~  40 /  40
+    ok = timer:sleep(N1 + 20),
+    {wait, N2, R3} = genlib_retry:next_step(R2), % ~  80 / 120
+    ok = timer:sleep(N2 + 30),
+    {wait, N3, R4} = genlib_retry:next_step(R3), % ~ 170 / 290
+    ok = timer:sleep(N3 + 40),
+    {wait, N4, R5} = genlib_retry:next_step(R4), % ~ 360 / 650
+    ok = timer:sleep(N4 + 50),
+    {wait, N5, R6} = genlib_retry:next_step(R5), % ~ 450 / 1100
+    ok = timer:sleep(N5 + 60),
+    finish = genlib_retry:next_step(R6),         % ~ 440 / 1540
+    ?assertNear(40, N1, 10),
+    ?assertNear(80, N2, 10),
+    ?assertNear(170, N3, 10),
+    ?assertNear(360, N4, 10),
+    ?assertNear(450, N5, 10),
+    ok.
 
 linear_compute_retries_test() ->
     Fixture = [

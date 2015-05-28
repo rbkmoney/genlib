@@ -8,6 +8,8 @@
 -export([exponential/4]).
 -export([intervals/1]).
 
+-export([timecap/2]).
+
 -export([next_step/1]).
 
 -export_type([strategy/0]).
@@ -69,6 +71,14 @@ exponential(Retries = {max_total_timeout, MaxTotalTimeout}, Factor, Timeout, Max
 intervals(Array = [Timeout | _]) when ?is_posint(Timeout) ->
     {array, Array}.
 
+-spec timecap(MaxTimeToSpend :: timeout(), strategy()) -> strategy().
+
+timecap(infinity, Strategy) ->
+    Strategy;
+timecap(MaxTimeToSpend, Strategy) when ?is_posint(MaxTimeToSpend) ->
+    Now = now_ms(),
+    {timecap, Now, Now + MaxTimeToSpend, Strategy}.
+
 %%
 
 -spec next_step(strategy()) -> {wait, Timeout::pos_integer(), strategy()} | finish.
@@ -88,6 +98,20 @@ next_step({array, []}) ->
     finish;
 next_step({array, [Timeout|Remain]}) ->
     {wait, Timeout, {array, Remain}};
+
+next_step({timecap, Last, Deadline, Strategy}) ->
+    Now = now_ms(),
+    case next_step(Strategy) of
+        {wait, Cooldown, NextStrategy} ->
+            case max(0, Cooldown - (Now - Last)) of
+                Timeout when Now + Timeout > Deadline ->
+                    finish;
+                Timeout ->
+                    {wait, Timeout, {timecap, Now + Timeout, Deadline, NextStrategy}}
+            end;
+        finish ->
+            finish
+    end;
 
 next_step(Strategy) ->
     error(badarg, [Strategy]).
@@ -131,3 +155,6 @@ release_retry(infinity) ->
     infinity;
 release_retry(N) ->
     N - 1.
+
+now_ms() ->
+    genlib_time:ticks() div 1000.
