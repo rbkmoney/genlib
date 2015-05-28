@@ -19,7 +19,8 @@
 -opaque strategy() ::
       {linear     , Retries::retries_num(), Timeout::pos_integer()}
     | {exponential, Retries::retries_num(), Factor::number(), Timeout::pos_integer(), MaxTimeout::timeout()}
-    | {array      , Array::list(pos_integer())}.
+    | {array      , Array::list(pos_integer())}
+    | finish.
 
 %%
 
@@ -77,7 +78,9 @@ timecap(infinity, Strategy) ->
     Strategy;
 timecap(MaxTimeToSpend, Strategy) when ?is_posint(MaxTimeToSpend) ->
     Now = now_ms(),
-    {timecap, Now, Now + MaxTimeToSpend, Strategy}.
+    {timecap, Now, Now + MaxTimeToSpend, Strategy};
+timecap(_, _Strategy) ->
+    finish.
 
 %%
 
@@ -112,6 +115,9 @@ next_step({timecap, Last, Deadline, Strategy}) ->
         finish ->
             finish
     end;
+
+next_step(finish) ->
+    finish;
 
 next_step(Strategy) ->
     error(badarg, [Strategy]).
