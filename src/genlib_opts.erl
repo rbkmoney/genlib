@@ -11,6 +11,9 @@
 
 -export([require/2]).
 
+-export([take/2]).
+-export([take/3]).
+
 -export([values/2]).
 
 %%
@@ -43,6 +46,22 @@ require(Key, Opts) ->
         Ref -> error({missing_options, Key});
         Value -> Value
     end.
+
+-spec take(key(), opts()) -> {any() | undefined, opts()}.
+
+take(Key, Opts) ->
+    take(Key, Opts, undefined).
+
+-spec take(key(), opts(), Default) -> {any() | Default, opts()} when Default :: any().
+
+take(Key, Opts, Default) when is_atom(Key) ->
+    case lists:keytake(Key, 1, Opts) of
+        {value, {_, Value}, OptsNext} -> {Value, OptsNext};
+        false -> {Default, Opts}
+    end;
+
+take(Key, _, _) ->
+    error(badarg, [Key]).
 
 -spec values([key() | {key(), Default}], opts()) -> [any() | Default] when Default :: any().
 
