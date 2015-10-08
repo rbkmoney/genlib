@@ -156,5 +156,6 @@ duration_to_seconds({D, H, M, S}) -> duration_to_seconds({D * 24 + H, M, S}).
 -spec get_timezone() -> tzoffset().
 
 get_timezone() ->
-    {ok, [Sign, H, M], []} = io_lib:fread("~1s~2d~2d\n", os:cmd("date +%z")),
-    {list_to_atom(Sign), H, M}.
+    MinuteDiff = (?MODULE:now() - ?MODULE:unow()) div 60,
+    Sign = if MinuteDiff < 0 -> '-'; true -> '+' end,
+    {Sign, abs(MinuteDiff) div 60, abs(MinuteDiff) rem 60}.
