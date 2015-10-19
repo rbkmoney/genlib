@@ -23,7 +23,7 @@
 
     test_application_start/1,
     test_application_stop/1,
-
+    test_application_unload/1,
     env/1,
     env/2,
     env/3
@@ -150,6 +150,10 @@ test_application_start(App) ->
 
 test_application_stop(Apps) ->
     _ = [application:stop(App) || App <- lists:reverse(Apps)],
+    ok.
+
+test_application_unload(Apps) ->
+    _ = [application:unload(App) || App <- lists:reverse(Apps)],
     ok.
 
 set_app_env(App, Env) ->
