@@ -20,6 +20,7 @@
 
     start_application/1,
     start_application_with/2,
+    stop_unload_applications/1,
 
     test_application_start/1,
     test_application_stop/1,
@@ -156,23 +157,16 @@ test_application_unload(Apps) ->
     _ = [application:unload(App) || App <- lists:reverse(Apps)],
     ok.
 
+-spec stop_unload_applications([Application :: atom()]) -> ok.
+
+stop_unload_applications(Apps) ->
+    _ = test_application_stop(Apps),
+    test_application_unload(Apps).
+
 set_app_env(App, Env) ->
     R = [application:set_env(App, K, V) || {K, V} <- Env],
     _ = lists:all(fun (E) -> E =:= ok end, R) orelse exit(setenv_failed),
     ok.
-
-save_app_env(App) ->
-    Env = application:get_all_env(App),
-    set_app_env(App, [{'$ENV', Env}]).
-
-restore_app_env(App) ->
-    case env(App, '$ENV') of
-        Env when is_list(Env) ->
-            set_app_env(App, Env),
-            set_app_env(App, [{'$ENV', undefined}]);
-        _ ->
-            ok
-    end.
 
 %%
 
