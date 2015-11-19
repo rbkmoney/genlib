@@ -156,6 +156,8 @@ duration_to_seconds({D, H, M, S}) -> duration_to_seconds({D * 24 + H, M, S}).
 -spec get_timezone() -> tzoffset().
 
 get_timezone() ->
-    MinuteDiff = (?MODULE:now() - ?MODULE:unow()) div 60,
+    UNow = calendar:universal_time(),
+    Now = calendar:universal_time_to_local_time(UNow),
+    MinuteDiff = (daytime_to_unixtime(Now) - daytime_to_unixtime(UNow)) div 60,
     Sign = if MinuteDiff < 0 -> '-'; true -> '+' end,
     {Sign, abs(MinuteDiff) div 60, abs(MinuteDiff) rem 60}.
