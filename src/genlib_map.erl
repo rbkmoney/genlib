@@ -57,8 +57,12 @@ deepput([Key], Value, Map) ->
 deepput([Key | Rest], Value, Map) ->
     maps:put(Key, deepput(Rest, Value, get(Key, Map, #{})), Map).
 
--spec truemap(Function, map()) -> ok when
-    Function :: fun((Key :: any(), Value :: any()) -> {Key :: any(), Value :: any()}).
+-spec truemap(Function, #{K1 => V1}) -> #{K2 => V2} when
+    Function :: fun((K1, V1) -> {K2, V2}),
+    K1 :: any(),
+    K2 :: any(),
+    V1 :: any(),
+    V2 :: any().
 
 truemap(F, Map = #{}) ->
     maps:fold(fun (K, V, M) -> {Kn, Vn} = F(K, V), maps:put(Kn, Vn, M) end, #{}, Map).
