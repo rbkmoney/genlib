@@ -91,7 +91,7 @@ print(Arg, Limit) ->
 -spec unique() -> binary().
 
 unique() ->
-    <<I:160/integer>> = crypto:hash(sha, term_to_binary({make_ref(), now()})),
+    <<I:160/integer>> = crypto:hash(sha, term_to_binary({make_ref(), os:timestamp()})),
     genlib_format:format_int_base(I, 61).
 
 %%
