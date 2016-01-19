@@ -1,0 +1,6 @@
+box: erlang:18
+build:
+  steps:
+    - script:
+        name: run test suite
+        code: make test
