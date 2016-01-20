@@ -4,6 +4,7 @@ build:
       - script:
         name: run test suite
         code: make test
+
     after-steps:
       - allori/bitbucket-build-status:
         team_name: ${BITBUCKET_TEAM_ID}
