@@ -9,5 +9,6 @@ build:
       - allori/bitbucket-build-status:
         team_name: ${BITBUCKET_TEAM_ID}
         api_key: ${BITBUCKET_API_KEY}
-      - wantedly/pretty-slack-notify:
-        webhook_url: ${SLACK_WEBHOOK_URL}
+      - slack-notifier:
+        url: ${SLACK_WEBHOOK_URL}
+        username: "wercker"
