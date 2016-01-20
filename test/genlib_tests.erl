@@ -9,7 +9,7 @@
 %%
 
 dice_roll_test() ->
-    _ = random:seed(now()),
+    _ = random:seed(os:timestamp()),
     S = 10000,
     N = random_in(12, 20),
     Data = [{{choice, M}, random_in(10, 100)} || M <- lists:seq(1, N)],

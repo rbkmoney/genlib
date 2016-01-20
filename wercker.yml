@@ -1,6 +1,12 @@
 box: erlang:18
 build:
-  steps:
-    - script:
+    steps:
+      - script:
         name: run test suite
         code: make test
+    after-steps:
+      - allori/bitbucket-build-status:
+        team_name: ${BITBUCKET_TEAM_ID}
+        api_key: ${BITBUCKET_API_KEY}
+      - wantedly/pretty-slack-notify:
+        webhook_url: ${SLACK_WEBHOOK_URL}
