@@ -19,3 +19,11 @@ distclean:
 
 dialyze:
 	$(REBAR) dialyzer
+
+CI_CONFIG := ci/rebar.config
+
+%-ci: $(CI_CONFIG)
+	$(MAKE) REBAR_CONFIG=$(CI_CONFIG) $*
+
+$(CI_CONFIG): %: %.template
+	$(CURDIR)/template.sh "$<" >> "$@"

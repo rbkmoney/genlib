@@ -16,3 +16,4 @@ dev.config
 /_projects/
 /_steps/
 /_temp/
+ci/rebar.config

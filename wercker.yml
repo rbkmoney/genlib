@@ -10,7 +10,7 @@ build:
         code: make test
       - script:
         name: run dialyzer
-        code: make dialyze
+        code: make dialyze-ci
     after-steps:
       - slack-notifier:
         url: ${SLACK_WEBHOOK_URL}
