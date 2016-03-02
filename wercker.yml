@@ -6,6 +6,9 @@ dev:
 build:
     steps:
       - script:
+        name: symlinks workaround
+        code: rm -rf _build/*
+      - script:
         name: run test suite
         code: make test
       - script:
