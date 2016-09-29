@@ -4,7 +4,6 @@ REBAR ?= $(shell which rebar3 2>/dev/null || which ./rebar3)
 
 all: compile
 
-dc:
 compile:
 	$(REBAR) compile
 
@@ -17,13 +16,8 @@ clean:
 distclean:
 	$(REBAR) clean -a
 
+xref:
+	$(REBAR) xref
+
 dialyze:
 	$(REBAR) dialyzer
-
-CI_CONFIG := ci/rebar.config
-
-%-ci: $(CI_CONFIG)
-	$(MAKE) REBAR_CONFIG=$(CI_CONFIG) $*
-
-$(CI_CONFIG): %: %.template
-	$(CURDIR)/template.sh "$<" >> "$@"

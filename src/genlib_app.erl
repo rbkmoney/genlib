@@ -153,6 +153,8 @@ test_application_stop(Apps) ->
     _ = [application:stop(App) || App <- lists:reverse(Apps)],
     ok.
 
+-spec test_application_unload([Application :: atom()]) -> ok.
+
 test_application_unload(Apps) ->
     _ = [application:unload(App) || App <- lists:reverse(Apps)],
     ok.

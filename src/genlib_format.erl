@@ -193,12 +193,19 @@ ntoa(IP) ->
 
 %%
 
--spec format_stacktrace([erlang:stack_item()]) -> binary().
+-type stack_item() :: {
+    Module      :: module(),
+    Function    :: atom(),
+    ArityOrArgs :: arity() | [term()],
+    Location    :: [{file, string()} | {line, pos_integer()}]
+}.
+
+-spec format_stacktrace([stack_item()]) -> binary().
 
 format_stacktrace(Trace) ->
     format_stacktrace(Trace, []).
 
--spec format_stacktrace([erlang:stack_item()], Opts :: [newlines]) -> binary().
+-spec format_stacktrace([stack_item()], Opts :: [newlines]) -> binary().
 
 format_stacktrace(Trace, Opts) ->
     try format_stacktrace(Trace, lists:member(newlines, Opts), <<>>) catch

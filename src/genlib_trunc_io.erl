@@ -41,6 +41,11 @@
 -include_lib("eunit/include/eunit.hrl").
 -endif.
 
+-type format_string() :: atom() | string() | binary().
+
+-type format_option() :: {'chomp', boolean()}.
+-type format_options() :: [format_option()].
+
 -type option() :: {'depth', integer()}
     | {'lists_as_strings', boolean()}
     | {'force_strings', boolean()}.
@@ -56,9 +61,11 @@
         force_strings = false :: boolean()
     }).
 
+-spec format(format_string(), [term()], pos_integer()) -> string().
 format(Fmt, Args, Max) ->
     format(Fmt, Args, Max, []).
 
+-spec format(format_string(), [term()], pos_integer(), format_options()) -> string().
 format(Fmt, Args, Max, Options) ->
     try format_(Fmt, Args, Max, Options)
     catch
@@ -217,15 +224,15 @@ print({inline_bitstring, B}, _Max, _Options) when is_bitstring(B) ->
     SizeStr = integer_to_list(Size),
     {[ValueStr, $:, SizeStr], length(ValueStr) + length(SizeStr) +1};
 print(BitString, Max, Options) when is_bitstring(BitString) ->
-    case byte_size(BitString) > Max of
+    BL = case byte_size(BitString) > Max of
         true ->
-            BL = binary_to_list(BitString, 1, Max);
+            binary_to_list(BitString, 1, Max);
         _ ->
             R = erlang:bitstring_to_list(BitString),
             {Bytes, [Bits]} = lists:splitwith(fun erlang:is_integer/1, R),
             %% tag the trailing bits with a special tuple we catch when
             %% list_body calls print again
-            BL = Bytes ++ [{inline_bitstring, Bits}]
+            Bytes ++ [{inline_bitstring, Bits}]
     end,
     {X, Len0} = list_body(BL, Max - 4, dec_depth(Options), bitstring),
     {["<<", X, ">>"], Len0 + 4};
@@ -548,6 +555,7 @@ perf1() ->
     {M, _} = timer:tc(io_lib, write, [A]),
     {N, M}.
 
+-spec format_test() -> _.
 format_test() ->
     %% simple format strings
     ?assertEqual("foobar", lists:flatten(format("~s", [["foo", $b, $a, $r]], 50))),
@@ -568,6 +576,7 @@ format_test() ->
     ?assertEqual("[\"foo\",98,97,114]", lists:flatten(format("~10P", [["foo", $b, $a, $r], 10], 50))),
     ok.
 
+-spec atom_quoting_test() -> _.
 atom_quoting_test() ->
     ?assertEqual("hello", lists:flatten(format("~p", [hello], 50))),
     ?assertEqual("'hello world'", lists:flatten(format("~p", ['hello world'], 50))),
@@ -578,6 +587,7 @@ atom_quoting_test() ->
     ?assertEqual("abc123", lists:flatten(format("~p", [abc123], 50))),
     ok.
 
+-spec sane_float_printing_test() -> _.
 sane_float_printing_test() ->
     ?assertEqual("1.0", lists:flatten(format("~p", [1.0], 50))),
     ?assertEqual("1.23456789", lists:flatten(format("~p", [1.23456789], 50))),
@@ -586,11 +596,13 @@ sane_float_printing_test() ->
     ?assertEqual("0.1234567", lists:flatten(format("~p", [0.1234567], 50))),
     ok.
 
+-spec float_inside_list_test() -> _.
 float_inside_list_test() ->
     ?assertEqual("[97,38.233913133184835,99]", lists:flatten(format("~p", [[$a, 38.233913133184835, $c]], 50))),
     ?assertError(badarg, lists:flatten(format("~s", [[$a, 38.233913133184835, $c]], 50))),
     ok.
 
+-spec quote_strip_test() -> _.
 quote_strip_test() ->
     ?assertEqual("\"hello\"", lists:flatten(format("~p", ["hello"], 50))),
     ?assertEqual("hello", lists:flatten(format("~s", ["hello"], 50))),
@@ -600,6 +612,7 @@ quote_strip_test() ->
     ?assertEqual("hello world", lists:flatten(format("~s", ['hello world'], 50))),
     ok.
 
+-spec binary_printing_test() -> _.
 binary_printing_test() ->
     ?assertEqual("<<>>", lists:flatten(format("~p", [<<>>], 50))),
     ?assertEqual("", lists:flatten(format("~s", [<<>>], 50))),
@@ -630,6 +643,7 @@ binary_printing_test() ->
 
     ok.
 
+-spec bitstring_printing_test() -> _.
 bitstring_printing_test() ->
     ?assertEqual("<<1,2,3,1:7>>", lists:flatten(format("~p",
                 [<<1, 2, 3, 1:7>>], 100))),
@@ -648,6 +662,7 @@ bitstring_printing_test() ->
     ?assertEqual("{<<1:7>>}", lists:flatten(format("~p", [{<<1:7>>}], 50))),
     ok.
 
+-spec list_printing_test() -> _.
 list_printing_test() ->
     ?assertEqual("[]", lists:flatten(format("~p", [[]], 50))),
     ?assertEqual("[]", lists:flatten(format("~w", [[]], 50))),
@@ -685,6 +700,7 @@ list_printing_test() ->
     ?assertEqual("[9|9]", lists:flatten(format("~p", [[9|9]], 50))),
     ok.
 
+-spec iolist_printing_test() -> _.
 iolist_printing_test() ->
     ?assertEqual("iolist: HelloIamaniolist",
         lists:flatten(format("iolist: ~s", [[$H, $e,  $l, $l, $o, "I", ["am", [<<"an">>], [$i, $o, $l, $i, $s, $t]]]], 1000))),
@@ -699,6 +715,7 @@ iolist_printing_test() ->
 
     ok.
 
+-spec tuple_printing_test() -> _.
 tuple_printing_test() ->
     ?assertEqual("{}", lists:flatten(format("~p", [{}], 50))),
     ?assertEqual("{}", lists:flatten(format("~w", [{}], 50))),
@@ -726,11 +743,13 @@ tuple_printing_test() ->
                         22835963083295358096932575511191922182123945984}], 53))),
     ok.
 
+-spec unicode_test() -> _.
 unicode_test() ->
     ?assertEqual([231,167,129], lists:flatten(format("~s", [<<231,167,129>>], 50))),
     ?assertEqual([31169], lists:flatten(format("~ts", [<<231,167,129>>], 50))),
     ok.
 
+-spec depth_limit_test() -> _.
 depth_limit_test() ->
     ?assertEqual("{...}", lists:flatten(format("~P", [{a, [b, [c, [d]]]}, 1], 50))),
     ?assertEqual("{a,...}", lists:flatten(format("~P", [{a, [b, [c, [d]]]}, 2], 50))),
@@ -792,6 +811,7 @@ depth_limit_test() ->
 
     ok.
 
+-spec print_terms_without_format_string_test() -> _.
 print_terms_without_format_string_test() ->
     ?assertError(badarg, format({hello, world}, [], 50)),
     ?assertError(badarg, format([{google, bomb}], [], 50)),
@@ -828,7 +848,7 @@ print_terms_without_format_string_test() ->
 %%
 
 -record(options, {
-        chomp = false
+        chomp = false :: boolean()
     }).
 
 format_([], [], _, _) ->

@@ -4,10 +4,13 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-spec test() -> _.
+
 -define(assertNear(E, N, Eps), ?assert((E - Eps < N) and (N < E + Eps))).
 
 %%
 
+-spec linear_test() -> _.
 linear_test() ->
     R1 = genlib_retry:linear(3, 64),
     {wait, 64, R2} = genlib_retry:next_step(R1),
@@ -15,6 +18,7 @@ linear_test() ->
     {wait, 64, R4} = genlib_retry:next_step(R3),
     finish = genlib_retry:next_step(R4).
 
+-spec exponential_test() -> _.
 exponential_test() ->
     R1 = genlib_retry:exponential(3, 2, 64),
     {wait, 64 , R2} = genlib_retry:next_step(R1),
@@ -22,6 +26,7 @@ exponential_test() ->
     {wait, 256, R4} = genlib_retry:next_step(R3),
     finish = genlib_retry:next_step(R4).
 
+-spec timecap_test() -> _.
 timecap_test() ->
     R1 = genlib_retry:timecap(1500, genlib_retry:exponential(infinity, 2, 50, 500)),
     ok = timer:sleep(10),
@@ -43,6 +48,7 @@ timecap_test() ->
     ?assertNear(450, N5, 10),
     ok.
 
+-spec linear_compute_retries_test() -> _.
 linear_compute_retries_test() ->
     Fixture = [
         {{max_total_timeout, 1909}, 10},
@@ -56,6 +62,7 @@ linear_compute_retries_test() ->
         Fixture
     ).
 
+-spec exponential_compute_retries_test() -> _.
 exponential_compute_retries_test() ->
     Fixture = [
         {{max_total_timeout, 130}, 2, 10,  1300},

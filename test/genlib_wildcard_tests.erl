@@ -4,6 +4,11 @@
 -module(genlib_wildcard_tests).
 -include_lib("eunit/include/eunit.hrl").
 
+-spec test() -> _.
+
+-type testcase() :: {_, fun()}.
+
+-spec match_test_() -> [testcase()].
 match_test_() ->
     lists:map(fun({{Pattern, Text}, Result}) ->
             ?_assertEqual(Result, genlib_wildcard:match(Pattern, Text))
@@ -36,6 +41,7 @@ match_test_() ->
         ]
     ).
 
+-spec unicode_test_() -> [testcase()].
 unicode_test_() ->
     [
         ?_assertEqual(true, genlib_wildcard:match(<<"Казалось бы, но нет"/utf8>>, <<"*">>)),

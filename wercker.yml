@@ -6,11 +6,17 @@ dev:
 build:
     steps:
       - script:
-        name: run test suite
-        code: make test
+        name: compile
+        code: make compile
+      - script:
+        name: run xref
+        code: make xref
       - script:
         name: run dialyzer
-        code: make dialyze-ci
+        code: make dialyze
+      - script:
+        name: run test suite
+        code: make test
     after-steps:
       - slack-notifier:
         url: ${SLACK_WEBHOOK_URL}

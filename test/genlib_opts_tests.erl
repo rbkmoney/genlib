@@ -4,6 +4,11 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-spec test() -> _.
+
+-type testcase() :: {_, fun()}.
+
+-spec take_test_() -> [testcase()].
 take_test_() ->
     Opts = [{hey, "oh"}, {listen, "what"}, {i, "say oh"}, {come, "back and..."}],
     [
