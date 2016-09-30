@@ -4,6 +4,11 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-spec test() -> _.
+
+-type testcase() :: {_, fun()}.
+
+-spec get_test_() -> [testcase()].
 get_test_() ->
     Map = #{hey => "oh", listen => "what", i => "say oh", come => "back and..."},
     [
@@ -13,6 +18,7 @@ get_test_() ->
         ?_assertEqual(["say oh", "what", undefined, 42], genlib_map:mget([i, listen, dont, {know, 42}], Map))
     ].
 
+-spec truemap_test_() -> [testcase()].
 truemap_test_() ->
     Map = #{hey => "oh", listen => "what", i => "say oh", come => "back and..."},
     InvMap = #{"oh" => hey, "what" => listen, "say oh" => i, "back and..." => come},
@@ -20,6 +26,7 @@ truemap_test_() ->
         ?_assertEqual(InvMap, genlib_map:truemap(fun (K, V) -> {V, K} end, Map))
     ].
 
+-spec deepput_test_() -> [testcase()].
 deepput_test_() ->
     [
         ?_assertError(_, genlib_map:deepput(answ, 42, #{})),
@@ -30,6 +37,7 @@ deepput_test_() ->
         )
     ].
 
+-spec diff_test_() -> [testcase()].
 diff_test_() ->
     Map = #{hey => "oh", listen => "what", i => "say oh", come => "back and..."},
     [

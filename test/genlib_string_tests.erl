@@ -4,6 +4,11 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-spec test() -> _.
+
+-type testcase() :: {_, fun()}.
+
+-spec pad_numeric_test_() -> [testcase()].
 pad_numeric_test_() ->
     [
         ?_assertEqual(<<"00042">>, genlib_string:pad_numeric(42, 5)),
@@ -14,6 +19,7 @@ pad_numeric_test_() ->
         ?_assertError(badarg, genlib_string:pad_numeric(<<"LOST AND LOST AGAIN">>, -146))
     ].
 
+-spec pad_right_test_() -> [testcase()].
 pad_right_test_() ->
     [
         ?_assertEqual(<<"007    ">>, genlib_string:pad_string(<<"007">>, 7)),
@@ -22,6 +28,7 @@ pad_right_test_() ->
         ?_assertError(badarg, genlib_string:pad_string(<<"LOST AND LOST FOREVER">>, -1492))
     ].
 
+-spec snakecase_test_() -> [testcase()].
 snakecase_test_() ->
     [
         ?_assertEqual(<<"payer_mobile_commerce">> , genlib_string:to_snakecase(<<"PayerMobileCommerce">>)),
@@ -31,6 +38,7 @@ snakecase_test_() ->
         ?_assertEqual(<<"payer_cash">>            , genlib_string:to_snakecase(<<"PayerCash">>))
     ].
 
+-spec join_test_() -> [testcase()].
 join_test_() ->
     [
         ?_assertEqual(<<"foo!bar!z">>             , genlib_string:join($!, ["foo", <<"bar">>, $z])),

@@ -20,6 +20,7 @@
       {linear     , Retries::retries_num(), Timeout::pos_integer()}
     | {exponential, Retries::retries_num(), Factor::number(), Timeout::pos_integer(), MaxTimeout::timeout()}
     | {array      , Array::list(pos_integer())}
+    | {timecap    , Start::pos_integer(), Finish::pos_integer(), strategy()}
     | finish.
 
 %%

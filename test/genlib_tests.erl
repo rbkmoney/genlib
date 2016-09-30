@@ -6,10 +6,12 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-%%
+-spec test() -> _.
 
+-type testcase() :: {_, fun()}.
+
+-spec dice_roll_test() -> _.
 dice_roll_test() ->
-    _ = random:seed(os:timestamp()),
     S = 10000,
     N = random_in(12, 20),
     Data = [{{choice, M}, random_in(10, 100)} || M <- lists:seq(1, N)],
@@ -30,6 +32,7 @@ dice_roll_test() ->
     WSum = lists:foldl(fun ({_, W}, Acc) -> Acc + W end, 0, Data),
     ?assert(abs(Average - S / WSum) < 1).
 
+-spec print_test_() -> [testcase()].
 print_test_() ->
     [
         ?_assertMatch(<<"My hat">>, genlib:print(<<"My hate is for you, bastard!">>, 6)),
@@ -38,6 +41,7 @@ print_test_() ->
         ?_assert(byte_size(genlib:print(<<"ДВЕРЬ МНЕ ЗаПиЛи"/utf8>>, 21)) =< 21)
     ].
 
+-spec format_test_() -> [testcase()].
 format_test_() ->
     [
         ?_assertEqual(
@@ -56,7 +60,7 @@ format_test_() ->
 %%
 
 random_in(A, B) ->
-    random:uniform(B - A) + A - 1.
+    rand:uniform(B - A) + A - 1.
 
 group_choices(Cs) ->
     lists:foldl(

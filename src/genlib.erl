@@ -123,7 +123,7 @@ dice_roll(Data) ->
 dice_roll(0, _Data) ->
     error(badarg);
 dice_roll(WeightSum, Data) ->
-    RandomWeight = random:uniform(WeightSum), %% random number in [1..N], i guess
+    RandomWeight = rand:uniform(WeightSum), %% random number in [1..N], i guess
     dice_roll_(RandomWeight, Data).
 
 dice_roll_(RandomWeight, [{Data, Weight} | _]) when RandomWeight - Weight =< 0 ->

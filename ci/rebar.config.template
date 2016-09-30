@@ -1,1 +1,0 @@
-{dialyzer, [{base_plt_location, "${WERCKER_CACHE_DIR}"}]}.
