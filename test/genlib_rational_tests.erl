@@ -34,10 +34,13 @@ general_test_() ->
 
 round_test_() ->
     [
-        ?_assertEqual( 2, round(new( 5, 3))),
-        ?_assertEqual(-2, round(new(-5, 3))),
-        ?_assertEqual( 1, round(new( 7, 5))),
-        ?_assertEqual(-1, round(new(-7, 5)))
+        ?_assertEqual( 2, round(new(  5,  3))),
+        ?_assertEqual(-2, round(new( -5,  3))),
+        ?_assertEqual( 1, round(new(  7,  5))),
+        ?_assertEqual(-1, round(new( -7,  5))),
+        ?_assertEqual( 1, round(new(  7,  5))),
+        ?_assertEqual( 2, round(new( 15, 10))),
+        ?_assertEqual(-2, round(new(-15, 10)))
     ].
 
 %%

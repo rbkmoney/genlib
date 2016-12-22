@@ -4,13 +4,17 @@
 %%%
 %%% # Rounding rule
 %%%
-%%% Rounds up iff the remainder is strictly greater than the half of the
-%%% quotient in terms of absolute value:
+%%% Commercial rounding [1], round up iff the remainder is not less than the
+%%% half of the denomonator in terms of absolute value:
 %%%
-%%%     round(5 / 3)  =  2
-%%%     round(-5 / 3) = -2
-%%%     round(7 / 5)  =  1
-%%%     round(-7 / 5) = -1
+%%%     round(  5 /  3) =  2
+%%%     round( -5 /  3) = -2
+%%%     round(  7 /  5) =  1
+%%%     round( -7 /  5) = -1
+%%%     round( 15 / 10) =  2
+%%%     round(-15 / 10) = -2
+%%%
+%%% [1]: https://en.wikipedia.org/wiki/Rounding#Round_half_away_from_zero
 %%%
 
 -module(genlib_rational).
@@ -54,7 +58,7 @@ new(_, 0) ->
 round({0, _}) ->
     0;
 round({P, Q}) when P > 0 ->
-    P div Q + case 2 * (P rem Q) > Q of true -> 1; false -> 0 end;
+    P div Q + case 2 * (P rem Q) < Q of true -> 0; false -> 1 end;
 round({P, Q}) ->
     -round({-P, Q}).
 
