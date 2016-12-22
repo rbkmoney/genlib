@@ -5,7 +5,7 @@
 %%% # Rounding rule
 %%%
 %%% Commercial rounding [1], round up iff the remainder is not less than the
-%%% half of the denomonator in terms of absolute value:
+%%% half of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
 %%%     round( -5 /  3) = -2
@@ -26,7 +26,11 @@
 
 -export([new/1]).
 -export([new/2]).
+-export([num/1]).
+-export([denom/1]).
 -export([round/1]).
+
+-export([cmp/2]).
 
 -export([neg/1]).
 -export([add/2]).
@@ -53,6 +57,16 @@ new(P, Q) when Q < 0 ->
 new(_, 0) ->
     erlang:error(badarg).
 
+-spec num(t()) -> integer().
+
+num({P, _}) ->
+    P.
+
+-spec denom(t()) -> neg_integer() | pos_integer().
+
+denom({_, Q}) ->
+    Q.
+
 -spec round(t()) -> integer().
 
 round({0, _}) ->
@@ -61,6 +75,15 @@ round({P, Q}) when P > 0 ->
     P div Q + case 2 * (P rem Q) < Q of true -> 0; false -> 1 end;
 round({P, Q}) ->
     -round({-P, Q}).
+
+-spec cmp(t(), t()) -> eq | gt | lt.
+
+cmp(R1, R2) ->
+    case num(sub(R1, R2)) of
+        P when P > 0 -> gt;
+        P when P < 0 -> lt;
+        0 -> eq
+    end.
 
 -spec neg(t()) -> t().
 

@@ -13,6 +13,7 @@
 %%
 
 -spec general_test_() -> [testcase()].
+-spec compare_test_() -> [testcase()].
 -spec round_test_() -> [testcase()].
 
 general_test_() ->
@@ -32,6 +33,14 @@ general_test_() ->
         ?_assertEqual(2 , round(dvd(new(  4,    7), new(   2,    7))))
     ].
 
+compare_test_() ->
+    [
+        ?_assertEqual(eq, cmp(new( 17,  3), new( 17,   3))),
+        ?_assertEqual(eq, cmp(new(  1,  4), new( 25, 100))),
+        ?_assertEqual(gt, cmp(new(  1,  3), new(  1,   4))),
+        ?_assertEqual(lt, cmp(new(  1,  5), new(  1,   4)))
+    ].
+
 round_test_() ->
     [
         ?_assertEqual( 2, round(new(  5,  3))),
@@ -47,6 +56,7 @@ round_test_() ->
 
 new(P)      -> genlib_rational:new(P).
 new(P, Q)   -> genlib_rational:new(P, Q).
+cmp(P, Q)   -> genlib_rational:cmp(P, Q).
 neg(R1)     -> genlib_rational:neg(R1).
 inv(R1)     -> genlib_rational:inv(R1).
 add(R1, R2) -> genlib_rational:add(R1, R2).
