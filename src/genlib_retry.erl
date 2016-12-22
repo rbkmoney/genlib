@@ -3,6 +3,8 @@
 
 -module(genlib_retry).
 
+-export([new/1]).
+
 -export([linear/2]).
 -export([exponential/3]).
 -export([exponential/4]).
@@ -12,9 +14,19 @@
 
 -export([next_step/1]).
 
+-export_type([policy/0]).
+
 -export_type([strategy/0]).
 
+
 -type retries_num() :: pos_integer() | infinity.
+
+-type policy() ::
+      {linear, retries_num() | {max_total_timeout, pos_integer()}, pos_integer()}
+    | {exponential, retries_num() | {max_total_timeout, pos_integer()}, number(), pos_integer()}
+    | {exponential, retries_num() | {max_total_timeout, pos_integer()}, number(), pos_integer(), timeout()}
+    | {intervals, [pos_integer(), ...]}
+    | {timecap, timeout(), policy()}.
 
 -opaque strategy() ::
       {linear     , Retries::retries_num(), Timeout::pos_integer()}
@@ -28,6 +40,22 @@
 -define(is_posint(V), (is_integer(V) andalso V > 0)).
 -define(is_retries(V), (V =:= infinity orelse ?is_posint(V))).
 -define(is_max_total_timeout(V), (is_integer(V) andalso V >= 0)).
+
+-spec new(policy()) -> strategy().
+
+new({linear, Retries, Timeout}) ->
+    linear(Retries, Timeout);
+new({exponential, Retries, Factor, Timeout}) ->
+    exponential(Retries, Factor, Timeout);
+new({exponential, Retries, Factor, Timeout, MaxTimeout}) ->
+    exponential(Retries, Factor, Timeout, MaxTimeout);
+new({intervals, Array}) ->
+    intervals(Array);
+new({timecap, Timeout, Policy}) ->
+    timecap(Timeout, new(Policy));
+new(BadPolicy) ->
+    erlang:error(badarg, [BadPolicy]).
+
 
 -spec linear(retries_num() | {max_total_timeout, pos_integer()}, pos_integer()) -> strategy().
 
