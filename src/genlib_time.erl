@@ -109,12 +109,24 @@ sanitize_date(Date) ->
 days_between(D1, D2) ->
     calendar:date_to_gregorian_days(D2) - calendar:date_to_gregorian_days(D1).
 
--spec shift_date(calendar:date(), integer()) -> calendar:date().
+-type date_interval() :: {integer(), integer(), integer()}.
 
-shift_date(Date, Days) ->
-    calendar:gregorian_days_to_date(calendar:date_to_gregorian_days(Date) + Days).
+-spec shift_date(calendar:date(), integer() | date_interval()) -> calendar:date().
 
-%%
+shift_date({Y, M, D}, {Ys, Ms, Ds}) ->
+    Date1 = normalize_month_days(normalize_year({Y + Ys, M + Ms, D})),
+    shift_date(Date1, Ds);
+shift_date(Date, Ds) when is_integer(Ds) ->
+    calendar:gregorian_days_to_date(calendar:date_to_gregorian_days(Date) + Ds).
+
+normalize_year({Y, M, D}) when M > 12 orelse M < 1 ->
+    Ms = (Y * 12 + (M - 1)),
+    {Ms div 12, Ms rem 12 + 1, D};
+normalize_year(Date) ->
+    Date.
+
+normalize_month_days({Y, M, D}) ->
+    {Y, M, erlang:min(D, calendar:last_day_of_the_month(Y, M))}.
 
 -type duration() :: {0..24, 0..59, 0..59} | {Days :: non_neg_integer(), 0..24, 0..59, 0..59}.
 
