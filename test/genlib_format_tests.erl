@@ -16,6 +16,17 @@ hex_test_() ->
         ?_assertError(badarg, genlib_format:hex_to_binary(<<"DEF">>))
     ].
 
+-spec format_int_base_test_() -> [testcase()].
+format_int_base_test_() ->
+    [
+        ?_assertError(    badarg, genlib_format:format_int_base( 12345, 99)),
+        ?_assertError(    badarg, genlib_format:format_int_base(-12345, 63)),
+        ?_assertError(    badarg, genlib_format:format_int_base(     5,  1)),
+        ?_assertEqual(   <<"0">>, genlib_format:format_int_base(     0, 42)),
+        ?_assertEqual( <<"HW5">>, genlib_format:format_int_base( 31337, 42)),
+        ?_assertEqual(<<"-HW5">>, genlib_format:format_int_base(-31337, 42))
+    ].
+
 -spec datetime_test_() -> [testcase()].
 datetime_test_() ->
     [

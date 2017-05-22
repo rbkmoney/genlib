@@ -39,8 +39,9 @@
 format_int_base(I, Base) when is_integer(I), is_integer(Base), Base >= 2, Base =< 62 ->
     R = list_to_binary(format_int_base(abs(I), Base, [])),
     if
-        I < 0 -> <<$-, R/binary>>;
-        true  -> R
+        I  > 0 -> R;
+        I == 0 -> <<$0>>;
+        I  < 0 -> <<$-, R/binary>>
     end;
 
 format_int_base(I, Base) ->
