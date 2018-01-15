@@ -15,7 +15,7 @@
 %%%     round(-15 / 10) = -2
 %%%
 %%% ## [round_half_towards_zero][2]
-%%% Round up iff the remainder is more than theThe method rhalf of the denominator in terms of absolute value:
+%%% Round up iff the remainder is more than the half of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
 %%%     round( -5 /  3) = -2
