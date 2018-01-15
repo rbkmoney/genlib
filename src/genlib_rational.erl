@@ -4,7 +4,7 @@
 %%%
 %%% # Rounding methods
 %%%
-%%% round_half_away_from_zero - round up if the remainder is not less than the
+%%% ## [round_half_away_from_zero][1] - round up iff the remainder is not less than the
 %%% half of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
@@ -14,9 +14,7 @@
 %%%     round( 15 / 10) =  2
 %%%     round(-15 / 10) = -2
 %%%
-%%% [1]: https://en.wikipedia.org/wiki/Rounding#Round_half_away_from_zero
-%%%
-%%% round_half_towards_zero - round up if the remainder is more than the
+%%% ## [round_half_towards_zero][2] - round up iff the remainder is more than the
 %%% half of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
@@ -26,9 +24,10 @@
 %%%     round( 15 / 10) =  1
 %%%     round(-15 / 10) = -1
 %%%
+%%% [1]: https://en.wikipedia.org/wiki/Rounding#Round_half_away_from_zero
 %%% [2]: https://en.wikipedia.org/wiki/Rounding#Round_half_towards_zero
 %%%
-%%% By default round_half_away_from_zero method used.
+%%% By default round_half_away_from_zero method is used.
 
 -module(genlib_rational).
 
