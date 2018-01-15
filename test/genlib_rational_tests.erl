@@ -15,6 +15,8 @@
 -spec general_test_() -> [testcase()].
 -spec compare_test_() -> [testcase()].
 -spec round_test_() -> [testcase()].
+-spec round_from_zero_test_() -> [testcase()].
+-spec round_to_zero_test_() -> [testcase()].
 
 general_test_() ->
     [
@@ -52,15 +54,39 @@ round_test_() ->
         ?_assertEqual(-2, round(new(-15, 10)))
     ].
 
+round_from_zero_test_() ->
+    [
+        ?_assertEqual( 2, round_from_zero(new(  5,  3))),
+        ?_assertEqual(-2, round_from_zero(new( -5,  3))),
+        ?_assertEqual( 1, round_from_zero(new(  7,  5))),
+        ?_assertEqual(-1, round_from_zero(new( -7,  5))),
+        ?_assertEqual( 1, round_from_zero(new(  7,  5))),
+        ?_assertEqual( 2, round_from_zero(new( 15, 10))),
+        ?_assertEqual(-2, round_from_zero(new(-15, 10)))
+    ].
+
+round_to_zero_test_() ->
+    [
+        ?_assertEqual( 2, round_to_zero(new(  5,  3))),
+        ?_assertEqual(-2, round_to_zero(new( -5,  3))),
+        ?_assertEqual( 1, round_to_zero(new(  7,  5))),
+        ?_assertEqual(-1, round_to_zero(new( -7,  5))),
+        ?_assertEqual( 1, round_to_zero(new(  7,  5))),
+        ?_assertEqual( 1, round_to_zero(new( 15, 10))),
+        ?_assertEqual(-1, round_to_zero(new(-15, 10)))
+    ].
+
 %%
 
-new(P)      -> genlib_rational:new(P).
-new(P, Q)   -> genlib_rational:new(P, Q).
-cmp(P, Q)   -> genlib_rational:cmp(P, Q).
-neg(R1)     -> genlib_rational:neg(R1).
-inv(R1)     -> genlib_rational:inv(R1).
-add(R1, R2) -> genlib_rational:add(R1, R2).
-sub(R1, R2) -> genlib_rational:sub(R1, R2).
-mul(R1, R2) -> genlib_rational:mul(R1, R2).
-dvd(R1, R2) -> genlib_rational:dvd(R1, R2).
-round(R1)   -> genlib_rational:round(R1).
+new(P)              -> genlib_rational:new(P).
+new(P, Q)           -> genlib_rational:new(P, Q).
+cmp(P, Q)           -> genlib_rational:cmp(P, Q).
+neg(R1)             -> genlib_rational:neg(R1).
+inv(R1)             -> genlib_rational:inv(R1).
+add(R1, R2)         -> genlib_rational:add(R1, R2).
+sub(R1, R2)         -> genlib_rational:sub(R1, R2).
+mul(R1, R2)         -> genlib_rational:mul(R1, R2).
+dvd(R1, R2)         -> genlib_rational:dvd(R1, R2).
+round(R1)           -> genlib_rational:round(R1).
+round_from_zero(R1) -> genlib_rational:round_from_zero(R1).
+round_to_zero(R1)   -> genlib_rational:round_to_zero(R1).

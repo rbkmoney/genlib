@@ -29,6 +29,8 @@
 -export([num/1]).
 -export([denom/1]).
 -export([round/1]).
+-export([round_to_zero/1]).
+-export([round_from_zero/1]).
 
 -export([cmp/2]).
 
@@ -69,12 +71,26 @@ denom({_, Q}) ->
 
 -spec round(t()) -> integer().
 
-round({0, _}) ->
+round(V) ->
+    round_from_zero(V).
+
+-spec round_to_zero(t()) -> integer().
+
+round_to_zero({0, _}) ->
     0;
-round({P, Q}) when P > 0 ->
+round_to_zero({P, Q}) when P > 0 ->
+    P div Q + case 2 * (P rem Q) > Q of true -> 1; false -> 0 end;
+round_to_zero({P, Q}) ->
+    -round_to_zero({-P, Q}).
+
+-spec round_from_zero(t()) -> integer().
+
+round_from_zero({0, _}) ->
+    0;
+round_from_zero({P, Q}) when P > 0 ->
     P div Q + case 2 * (P rem Q) < Q of true -> 0; false -> 1 end;
-round({P, Q}) ->
-    -round({-P, Q}).
+round_from_zero({P, Q}) ->
+    -round_from_zero({-P, Q}).
 
 -spec cmp(t(), t()) -> eq | gt | lt.
 
