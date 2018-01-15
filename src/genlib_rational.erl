@@ -2,9 +2,9 @@
 %%% Genlib
 %%% Rational number arithmetic subset
 %%%
-%%% # Rounding rule
+%%% # Rounding methods
 %%%
-%%% Commercial rounding [1], round up iff the remainder is not less than the
+%%% round_half_away_from_zero - round up if the remainder is not less than the
 %%% half of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
@@ -16,6 +16,19 @@
 %%%
 %%% [1]: https://en.wikipedia.org/wiki/Rounding#Round_half_away_from_zero
 %%%
+%%% round_half_towards_zero - round up if the remainder is more than the
+%%% half of the denominator in terms of absolute value:
+%%%
+%%%     round(  5 /  3) =  2
+%%%     round( -5 /  3) = -2
+%%%     round(  7 /  5) =  1
+%%%     round( -7 /  5) = -1
+%%%     round( 15 / 10) =  1
+%%%     round(-15 / 10) = -1
+%%%
+%%% [2]: https://en.wikipedia.org/wiki/Rounding#Round_half_towards_zero
+%%%
+%%% By default round_half_away_from_zero method used.
 
 -module(genlib_rational).
 
@@ -29,8 +42,7 @@
 -export([num/1]).
 -export([denom/1]).
 -export([round/1]).
--export([round_to_zero/1]).
--export([round_from_zero/1]).
+-export([round/2]).
 
 -export([cmp/2]).
 
@@ -72,25 +84,18 @@ denom({_, Q}) ->
 -spec round(t()) -> integer().
 
 round(V) ->
-    round_from_zero(V).
+    round(V, round_half_away_from_zero).
 
--spec round_to_zero(t()) -> integer().
+-spec round(t(), round_half_towards_zero | round_half_away_from_zero) -> integer().
 
-round_to_zero({0, _}) ->
+round({0, _}, _) ->
     0;
-round_to_zero({P, Q}) when P > 0 ->
+round({P, Q}, round_half_towards_zero) when P > 0 ->
     P div Q + case 2 * (P rem Q) > Q of true -> 1; false -> 0 end;
-round_to_zero({P, Q}) ->
-    -round_to_zero({-P, Q}).
-
--spec round_from_zero(t()) -> integer().
-
-round_from_zero({0, _}) ->
-    0;
-round_from_zero({P, Q}) when P > 0 ->
+round({P, Q}, round_half_away_from_zero) when P > 0 ->
     P div Q + case 2 * (P rem Q) < Q of true -> 0; false -> 1 end;
-round_from_zero({P, Q}) ->
-    -round_from_zero({-P, Q}).
+round({P, Q}, Method) ->
+    -round({-P, Q}, Method).
 
 -spec cmp(t(), t()) -> eq | gt | lt.
 

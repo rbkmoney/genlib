@@ -15,8 +15,8 @@
 -spec general_test_() -> [testcase()].
 -spec compare_test_() -> [testcase()].
 -spec round_test_() -> [testcase()].
--spec round_from_zero_test_() -> [testcase()].
--spec round_to_zero_test_() -> [testcase()].
+-spec round_half_away_from_zero_test_() -> [testcase()].
+-spec round_half_towards_zero_test_() -> [testcase()].
 
 general_test_() ->
     [
@@ -54,26 +54,26 @@ round_test_() ->
         ?_assertEqual(-2, round(new(-15, 10)))
     ].
 
-round_from_zero_test_() ->
+round_half_away_from_zero_test_() ->
     [
-        ?_assertEqual( 2, round_from_zero(new(  5,  3))),
-        ?_assertEqual(-2, round_from_zero(new( -5,  3))),
-        ?_assertEqual( 1, round_from_zero(new(  7,  5))),
-        ?_assertEqual(-1, round_from_zero(new( -7,  5))),
-        ?_assertEqual( 1, round_from_zero(new(  7,  5))),
-        ?_assertEqual( 2, round_from_zero(new( 15, 10))),
-        ?_assertEqual(-2, round_from_zero(new(-15, 10)))
+        ?_assertEqual( 2, round(new(  5,  3), round_half_away_from_zero)),
+        ?_assertEqual(-2, round(new( -5,  3), round_half_away_from_zero)),
+        ?_assertEqual( 1, round(new(  7,  5), round_half_away_from_zero)),
+        ?_assertEqual(-1, round(new( -7,  5), round_half_away_from_zero)),
+        ?_assertEqual( 1, round(new(  7,  5), round_half_away_from_zero)),
+        ?_assertEqual( 2, round(new( 15, 10), round_half_away_from_zero)),
+        ?_assertEqual(-2, round(new(-15, 10), round_half_away_from_zero))
     ].
 
-round_to_zero_test_() ->
+round_half_towards_zero_test_() ->
     [
-        ?_assertEqual( 2, round_to_zero(new(  5,  3))),
-        ?_assertEqual(-2, round_to_zero(new( -5,  3))),
-        ?_assertEqual( 1, round_to_zero(new(  7,  5))),
-        ?_assertEqual(-1, round_to_zero(new( -7,  5))),
-        ?_assertEqual( 1, round_to_zero(new(  7,  5))),
-        ?_assertEqual( 1, round_to_zero(new( 15, 10))),
-        ?_assertEqual(-1, round_to_zero(new(-15, 10)))
+        ?_assertEqual( 2, round(new(  5,  3), round_half_towards_zero)),
+        ?_assertEqual(-2, round(new( -5,  3), round_half_towards_zero)),
+        ?_assertEqual( 1, round(new(  7,  5), round_half_towards_zero)),
+        ?_assertEqual(-1, round(new( -7,  5), round_half_towards_zero)),
+        ?_assertEqual( 1, round(new(  7,  5), round_half_towards_zero)),
+        ?_assertEqual( 1, round(new( 15, 10), round_half_towards_zero)),
+        ?_assertEqual(-1, round(new(-15, 10), round_half_towards_zero))
     ].
 
 %%
@@ -88,5 +88,4 @@ sub(R1, R2)         -> genlib_rational:sub(R1, R2).
 mul(R1, R2)         -> genlib_rational:mul(R1, R2).
 dvd(R1, R2)         -> genlib_rational:dvd(R1, R2).
 round(R1)           -> genlib_rational:round(R1).
-round_from_zero(R1) -> genlib_rational:round_from_zero(R1).
-round_to_zero(R1)   -> genlib_rational:round_to_zero(R1).
+round(R1, Method)   -> genlib_rational:round(R1, Method).
