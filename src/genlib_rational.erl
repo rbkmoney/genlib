@@ -4,8 +4,8 @@
 %%%
 %%% # Rounding methods
 %%%
-%%% ## [round_half_away_from_zero][1] - round up iff the remainder is not less than the
-%%% half of the denominator in terms of absolute value:
+%%% ## [round_half_away_from_zero][1]
+%%% Round up iff the remainder is not less than the half of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
 %%%     round( -5 /  3) = -2
@@ -14,8 +14,8 @@
 %%%     round( 15 / 10) =  2
 %%%     round(-15 / 10) = -2
 %%%
-%%% ## [round_half_towards_zero][2] - round up iff the remainder is more than the
-%%% half of the denominator in terms of absolute value:
+%%% ## [round_half_towards_zero][2]
+%%% Round up iff the remainder is more than theThe method rhalf of the denominator in terms of absolute value:
 %%%
 %%%     round(  5 /  3) =  2
 %%%     round( -5 /  3) = -2
