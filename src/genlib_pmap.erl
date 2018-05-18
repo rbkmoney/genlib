@@ -18,15 +18,16 @@
     [result(B)].
 
 map(F, L) ->
-    Executor = executor(F),
-    collect(lists:map(Executor, L), fun replicate/1, #{timeout => infinity}).
+    lists:map(fun replicate/1, safemap(F, L, #{timeout => infinity})).
 
 safemap(F, L) ->
     safemap(F, L, #{}).
 
 safemap(F, L, Opts) ->
     Executor = executor(F),
-    collect(lists:map(Executor, L), fun wrap/1, Opts).
+    collect(lists:map(Executor, L), Opts).
+
+-dialyzer({nowarn_function, executor/1}).
 
 executor(F) ->
     fun (E) ->
@@ -36,29 +37,31 @@ executor(F) ->
         )}
     end.
 
+-spec execute(fun((A) -> _), A) -> no_return().
+
 execute(F, E) ->
     exit(
-        try {result, F(E)} catch
+        try {ok, F(E)} catch
             C:R ->
                 {error, {C, R, erlang:get_stacktrace()}}
         end
     ).
 
-collect(Ws, With, Opts) ->
+collect(Ws, Opts) ->
     To = maps:get(timeout, Opts, 5000),
     Te = shift_timeout(To, nowms()),
     lists:map(
         fun ({process, {PID, MRef}}) ->
             receive
-                {'DOWN', MRef, process, PID, {result, Result}} ->
-                    With({result, Result});
+                {'DOWN', MRef, process, PID, {ok, Result}} ->
+                    {ok, Result};
                 {'DOWN', MRef, process, PID, {error, Error}} ->
-                    With({error, Error});
+                    {error, Error};
                 {'DOWN', MRef, process, PID, Result} ->
-                    With({error, {exit, Result, []}})
+                    {error, {exit, Result, []}}
             after max(0, shift_timeout(Te, -nowms())) ->
                 _ = exit(PID, kill),
-                With(timeout)
+                timeout
             end
         end,
         Ws
@@ -69,19 +72,12 @@ shift_timeout(infinity, _) ->
 shift_timeout(To, V) ->
     To + V.
 
-replicate({result, Result}) ->
+replicate({ok, Result}) ->
     Result;
 replicate({error, {C, R, ST}}) ->
     erlang:raise(C, R, ST);
 replicate(timeout) ->
     error(timeout).
-
-wrap({result, Result}) ->
-    {ok, Result};
-wrap({error, Error}) ->
-    {error, Error};
-wrap(timeout) ->
-    timeout.
 
 nowms() ->
     {Ms, S, Mcs} = os:timestamp(),
