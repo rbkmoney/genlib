@@ -1,4 +1,4 @@
-box: erlang:18
+box: erlang:20
 dev:
     steps:
       - internal/shell:
