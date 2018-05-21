@@ -40,16 +40,16 @@ executor(F) ->
 -spec execute(fun((A) -> _), A) -> no_return().
 
 execute(F, E) ->
-    exit(
+    erlang:exit(
         try {ok, F(E)} catch
             C:R ->
                 {error, {C, R, erlang:get_stacktrace()}}
         end
     ).
 
-collect(Ws, Opts) ->
-    To = maps:get(timeout, Opts, 5000),
-    Te = shift_timeout(To, nowms()),
+collect(Workers, Opts) ->
+    Timeout = maps:get(timeout, Opts, 5000),
+    Deadline = shift_timeout(Timeout, nowms()),
     lists:map(
         fun ({process, {PID, MRef}}) ->
             receive
@@ -59,18 +59,19 @@ collect(Ws, Opts) ->
                     {error, Error};
                 {'DOWN', MRef, process, PID, Result} ->
                     {error, {exit, Result, []}}
-            after max(0, shift_timeout(Te, -nowms())) ->
-                _ = exit(PID, kill),
+            after max(0, shift_timeout(Deadline, -nowms())) ->
+                _ = erlang:demonitor(MRef, [flush]),
+                _ = erlang:exit(PID, kill),
                 timeout
             end
         end,
-        Ws
+        Workers
     ).
 
 shift_timeout(infinity, _) ->
     infinity;
-shift_timeout(To, V) ->
-    To + V.
+shift_timeout(Timeout, V) ->
+    Timeout + V.
 
 replicate({ok, Result}) ->
     Result;

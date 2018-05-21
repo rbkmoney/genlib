@@ -95,8 +95,13 @@ timeout_test_() ->
 speedup_test_() ->
     N = 100,
     T = 100,
+    ConstOverhead = 100,
     ?_assert(
-        3 * T >
+        % NOTE
+        % We assume here that pmap overall spent no more than `T` time (which is the time a single worker
+        % spends sleeping) plus some constant (which is essentially synchronisation overhead and non-ideal
+        % SMP as we run tests on real hardware after all)
+        T + ConstOverhead >
         measure(genlib_pmap, map, [
             fun (_) -> timer:sleep(T) end,
             lists:seq(1, N)
