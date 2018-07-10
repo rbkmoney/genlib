@@ -23,6 +23,7 @@
 -export([format_peer/1]).
 -export([format_stacktrace/1]).
 -export([format_stacktrace/2]).
+-export([format_exception/2]).
 
 -export([binary_to_hex/1]).
 -export([binary_to_hex/2]).
@@ -266,6 +267,11 @@ format_site(Filename, Line, Acc) ->
     F = genlib:to_binary(Filename),
     L = integer_to_binary(Line),
     <<Acc/binary, " at ", F/binary, ":", L/binary>>.
+
+-spec format_exception(genlib:exception()) ->
+    iodata().
+format_exception({Class, Reason, Stacktrace}) ->
+    io_lib:format("~s:~p ~s", [Class, Reason, format_stacktrace(Stacktrace, [newlines])]).
 
 %%
 
