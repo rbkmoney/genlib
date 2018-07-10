@@ -10,7 +10,7 @@
 -export_type([reg_name              /0]).
 -export_type([server_from           /0]).
 -export_type([server_init_ret       /1]).
--export_type([server_handle_call_ret/1]).
+-export_type([server_handle_call_ret/2]).
 -export_type([server_handle_cast_ret/1]).
 -export_type([server_handle_info_ret/1]).
 -export_type([server_code_change_ret/1]).
@@ -55,28 +55,28 @@
        ignore
     | {ok  , State   }
     | {stop, reason()}
-    | {ok  , State   , timeout_() | hibernate}
+    | {ok  , State   , timeout() | hibernate}
 .
 
 -type server_handle_call_ret(Reply, State) ::
       {noreply, State   }
-    | {noreply, State   , timeout_() | hibernate}
+    | {noreply, State   , timeout() | hibernate}
     | {reply  , Reply   , State                 }
     | {stop   , reason(), State                 }
-    | {reply  , Reply   , State        , timeout_() | hibernate}
-    | {stop   , reason(), _Reply       , State                 }
+    | {reply  , Reply   , State        , timeout() | hibernate}
+    | {stop   , reason(), _Reply       , State                }
 .
 
 -type server_handle_cast_ret(State) ::
       {noreply, State   }
-    | {noreply, State   , timeout_() | hibernate}
-    | {stop   , reason(), State                 }
+    | {noreply, State   , timeout() | hibernate}
+    | {stop   , reason(), State                }
 .
 
 -type server_handle_info_ret(State) ::
       {noreply, State   }
-    | {noreply, State   , timeout_() | hibernate}
-    | {stop   , reason(), State                 }
+    | {noreply, State   , timeout() | hibernate}
+    | {stop   , reason(), State                }
 .
 
 -type server_code_change_ret(State) ::

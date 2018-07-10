@@ -24,7 +24,7 @@
 -export([round/2]).
 
 -export([unwrap/1]).
--export([round /2]).
+-export([unwrap/2]).
 
 -export_type([exception/0]).
 -export([raise/1]).

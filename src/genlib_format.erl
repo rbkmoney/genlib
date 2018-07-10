@@ -23,7 +23,7 @@
 -export([format_peer/1]).
 -export([format_stacktrace/1]).
 -export([format_stacktrace/2]).
--export([format_exception/2]).
+-export([format_exception/1]).
 
 -export([binary_to_hex/1]).
 -export([binary_to_hex/2]).
