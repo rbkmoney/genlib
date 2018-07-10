@@ -10,14 +10,6 @@
 
 %%
 
--spec new_test() -> _.
-new_test() ->
-    ?assertEqual(genlib_retry:linear(3, 64), genlib_retry:new({linear, 3, 64})),
-    ?assertEqual(genlib_retry:exponential(3, 2, 64), genlib_retry:new({exponential, 3, 2, 64})),
-    ?assertEqual(genlib_retry:exponential(3, 2, 64, 500), genlib_retry:new({exponential, 3, 2, 64, 500})),
-    ?assertEqual(genlib_retry:intervals([3]), genlib_retry:new({intervals, [3]})),
-    ?assertEqual(genlib_retry:timecap(10, {linear, 3, 64}), genlib_retry:timecap(10, genlib_retry:linear(3, 64))).
-
 -spec linear_test() -> _.
 linear_test() ->
     R1 = genlib_retry:linear(3, 64),
