@@ -23,6 +23,12 @@
 
 -export([round/2]).
 
+-export([unwrap/1]).
+-export([unwrap/2]).
+
+-export_type([exception/0]).
+-export([raise/1]).
+
 %%
 
 -type weighted_data() :: [{term(), pos_integer()}].
@@ -136,3 +142,39 @@ dice_roll_(RandomWeight, [{_, Weight} | T]) ->
 round(Number, Precision) ->
     P = math:pow(10, Precision),
     round(Number * P) / P.
+
+%%
+
+-spec unwrap
+    (ok             ) -> ok;
+    ({ok   , Result}) -> Result;
+    ({error, _Error}) -> no_return().
+unwrap(ok) ->
+    ok;
+unwrap({ok, R}) ->
+    R;
+unwrap({error, Error}) ->
+    erlang:error(Error).
+
+-spec unwrap
+    (ok             , _Tag) -> ok;
+    ({ok   , Result}, _Tag) -> Result;
+    ( error         , _Tag) -> no_return();
+    ({error, _Error}, _Tag) -> no_return().
+unwrap(ok, _) ->
+    ok;
+unwrap({ok, R}, _) ->
+    R;
+unwrap(error, Tag) ->
+    erlang:error(Tag);
+unwrap({error, Error}, Tag) ->
+    erlang:error({Tag, Error}).
+
+%%
+
+-type exception() :: {exit | error | throw, term(), list()}.
+
+-spec raise(exception()) ->
+    no_return().
+raise({Class, Reason, Stacktrace}) ->
+    erlang:raise(Class, Reason, Stacktrace).
