@@ -34,7 +34,10 @@
 %%
 
 -opaque t() :: {integer(), pos_integer()}.
+-type rounding_method() :: round_half_towards_zero | round_half_away_from_zero.
+
 -export_type([t/0]).
+-export_type([rounding_method/0]).
 
 -export([new/1]).
 -export([new/2]).
@@ -85,7 +88,7 @@ denom({_, Q}) ->
 round(V) ->
     round(V, round_half_away_from_zero).
 
--spec round(t(), round_half_towards_zero | round_half_away_from_zero) -> integer().
+-spec round(t(), rounding_method()) -> integer().
 
 round({0, _}, _) ->
     0;
