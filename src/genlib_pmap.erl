@@ -42,8 +42,8 @@ executor(F) ->
 execute(F, E) ->
     erlang:exit(
         try {ok, F(E)} catch
-            C:R ->
-                {error, {C, R, erlang:get_stacktrace()}}
+            C:R:Stacktrace ->
+                {error, {C, R, Stacktrace}}
         end
     ).
 
