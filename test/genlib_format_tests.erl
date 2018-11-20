@@ -57,7 +57,7 @@ stacktrace_test_() ->
                 $\t, "called from genlib_format_tests:", _/binary
             >>,
             genlib_format:format_stacktrace(
-                try proplists:get_value(dink, drance, []) catch _:_ -> erlang:get_stacktrace() end,
+                try proplists:get_value(dink, drance, []) catch _:_:Stacktrace -> Stacktrace end,
                 [newlines]
             )
         ),
@@ -68,7 +68,7 @@ stacktrace_test_() ->
             >>,
             genlib_format:format_stacktrace(
                 try ordsets:add_element(1, {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}) catch
-                    _:_ -> erlang:get_stacktrace()
+                    _:_:Stacktrace -> Stacktrace
                 end
             )
         )
