@@ -17,6 +17,9 @@
 
 -export([unique/0]).
 
+-export([uuid/0]).
+-export([bsuuid/0]).
+
 -export([dirty_fields/3]).
 
 -export([dice_roll/1]).
@@ -30,6 +33,8 @@
 -export([raise/1]).
 
 %%
+
+-type uuid() :: <<_:128>>.
 
 -type weighted_data() :: [{term(), pos_integer()}].
 
@@ -99,6 +104,23 @@ print(Arg, Limit) ->
 unique() ->
     <<I:160/integer>> = crypto:hash(sha, term_to_binary({make_ref(), os:timestamp()})),
     genlib_format:format_int_base(I, 61).
+
+%%
+
+% Gen uuid version 4
+-spec uuid() -> uuid().
+
+uuid() ->
+    <<R1:48, _:4, R2:12, _:2, R3:62>> = crypto:strong_rand_bytes(16),
+    <<R1:48,
+      0:1, 1:1, 0:1, 0:1,  % version 4 bits
+      R2:12,
+      1:1, 0:1,            % RFC 4122 variant bits
+      R3:62>>.
+
+-spec bsuuid() -> binary().
+bsuuid() ->
+    genlib_format:uuid_to_bstring(uuid()).
 
 %%
 

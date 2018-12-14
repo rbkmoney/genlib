@@ -33,6 +33,12 @@
 -export([parse_datetime_iso8601/1]).
 -export([parse_datetime_iso8601_tz/1]).
 
+-export([uuid_to_bstring/1]).
+
+%%
+
+-type uuid() :: <<_:128>>.
+
 %%
 
 -spec format_int_base(Integer :: integer(), Base :: integer()) -> binary().
@@ -357,3 +363,8 @@ parse_datetime_iso8601_tz(Bin) ->
     end,
     {Datetime, Timezone}.
 
+-spec uuid_to_bstring(Value :: uuid()) -> binary().
+
+uuid_to_bstring(<<F1:4/bytes, F2:2/bytes, F3:2/bytes, F4:2/bytes, F5:6/bytes>>) ->
+    [F01, F02, F03, F04, F05] = [binary_to_hex(F, false) || F <- [F1, F2, F3, F4, F5]],
+    <<F01/binary, "-", F02/binary, "-", F03/binary, "-", F04/binary, "-", F05/binary>>.
