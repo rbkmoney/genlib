@@ -92,3 +92,16 @@ decimal_test_() ->
         ?_assertError(badarg, genlib_format:format_decimal(42, -1)),
         ?_assertError(badarg, genlib_format:format_decimal("42", 42))
     ].
+
+-spec uuid_to_bstring_test_() -> [testcase()].
+uuid_to_bstring_test_() ->
+    [
+        ?_assertEqual(
+           <<"952af85f-06e1-4986-b55e-bbe3951a2f4a">>,
+           genlib_format:uuid_to_bstring(<<149, 42, 248, 95,
+                                           6, 225,
+                                           73, 134,
+                                           181, 94,
+                                           187, 227, 149, 26, 47, 74>>)
+          )
+    ].
