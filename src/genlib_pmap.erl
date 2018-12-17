@@ -43,9 +43,10 @@ executor(F) ->
 
 execute(F, E) ->
     erlang:exit(
-        try {ok, F(E)} catch
-            ?STACKTRACE(C, R, Stacktrace)
-                {error, {C, R, Stacktrace}}
+        try
+            {ok, F(E)}
+        catch ?STACKTRACE(C, R, Stacktrace)
+            {error, {C, R, Stacktrace}}
         end
     ).
 
