@@ -4,6 +4,8 @@
 -export([safemap/2]).
 -export([safemap/3]).
 
+-include("otp_19_compatibility.hrl").
+
 -type result(T) :: {ok, T} | {error, _} | timeout.
 -type opts() :: #{
     timeout => timeout()
@@ -41,9 +43,10 @@ executor(F) ->
 
 execute(F, E) ->
     erlang:exit(
-        try {ok, F(E)} catch
-            C:R:Stacktrace ->
-                {error, {C, R, Stacktrace}}
+        try
+            {ok, F(E)}
+        catch ?STACKTRACE(C, R, Stacktrace)
+            {error, {C, R, Stacktrace}}
         end
     ).
 
