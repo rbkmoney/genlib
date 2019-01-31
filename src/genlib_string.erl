@@ -23,6 +23,8 @@
 -export([to_snakecase/1]).
 -export([is_equal_icase/2]).
 
+-export([redact/2]).
+
 %%
 
 -spec pad_string(binary(), pos_integer()) -> binary().
@@ -181,3 +183,20 @@ to_upper_char(C) ->
 
 is_equal_icase(S1, S2) ->
     to_lower(S1) =:= to_lower(S2).
+
+%%
+
+-spec redact(Subject :: binary(), Pattern :: binary()) -> Redacted :: binary().
+redact(Subject, Pattern) ->
+    case re:run(Subject, Pattern, [global, {capture, all_but_first, index}]) of
+        {match, Captures} ->
+            lists:foldl(fun redact_match/2, Subject, Captures);
+        nomatch ->
+            Subject
+    end.
+
+redact_match({S, Len}, Subject) ->
+    <<Pre:S/binary, _:Len/binary, Rest/binary>> = Subject,
+    <<Pre/binary, (binary:copy(<<"*">>, Len))/binary, Rest/binary>>;
+redact_match([Capture], Message) ->
+    redact_match(Capture, Message).
