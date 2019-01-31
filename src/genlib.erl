@@ -29,6 +29,8 @@
 -export([unwrap/1]).
 -export([unwrap/2]).
 
+-export([define/2]).
+
 -export_type([exception/0]).
 -export([raise/1]).
 
@@ -191,6 +193,14 @@ unwrap(error, Tag) ->
     erlang:error(Tag);
 unwrap({error, Error}, Tag) ->
     erlang:error({Tag, Error}).
+
+%%
+
+-spec define(undefined | T, T) -> T.
+define(undefined, V) ->
+    V;
+define(V, _Default) ->
+    V.
 
 %%
 
