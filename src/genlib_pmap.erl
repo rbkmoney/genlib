@@ -26,29 +26,26 @@ safemap(F, L) ->
     safemap(F, L, #{}).
 
 safemap(F, L, Opts) ->
-    Executor = executor(F),
+    Executor = spawner(F),
     collect(lists:map(Executor, L), Opts).
 
--dialyzer({nowarn_function, executor/1}).
-
-executor(F) ->
+spawner(F) ->
     fun (E) ->
-        {process, erlang:spawn_opt(
-            fun () -> execute(F, E) end,
-            [monitor]
-        )}
+        {process, erlang:spawn_opt(executor(F, E), [monitor])}
     end.
 
--spec execute(fun((A) -> _), A) -> no_return().
+-spec executor(fun((A) -> _), A) -> fun(() -> no_return()).
 
-execute(F, E) ->
-    erlang:exit(
-        try
-            {ok, F(E)}
-        catch ?STACKTRACE(C, R, Stacktrace)
-            {error, {C, R, Stacktrace}}
-        end
-    ).
+executor(F, E) ->
+    fun () ->
+        erlang:exit(
+            try
+                {ok, F(E)}
+            catch ?STACKTRACE(C, R, Stacktrace)
+                {error, {C, R, Stacktrace}}
+            end
+        )
+    end.
 
 collect(Workers, Opts) ->
     Timeout = maps:get(timeout, Opts, 5000),
