@@ -150,19 +150,19 @@ format_datetime_iso8601_tz(Datetime, {Sign, H, M}) ->
 format_datetime_iso8601_(Datetime) ->
     format_datetime([yyyy, $-, mm, $-, dd, $T, h, $:, m, $:, s], Datetime).
 
--define(cat(E), <<Bin/binary, (E)/binary>>).
+-define(cat(Acc, E), <<Acc/binary, (E)/binary>>).
 
-format_datetime_part(yyyy    , {{Y, _, _}, _}, Bin) -> ?cat(genlib_string:pad_numeric(Y, 4));
-format_datetime_part(yy      , {{Y, _, _}, _}, Bin) -> ?cat(genlib_string:pad_numeric(Y rem 100, 2));
-format_datetime_part(mm      , {{_, M, _}, _}, Bin) -> ?cat(genlib_string:pad_numeric(M, 2));
-format_datetime_part(dd      , {{_, _, D}, _}, Bin) -> ?cat(genlib_string:pad_numeric(D, 2));
-format_datetime_part(h       , {_, {H, _, _}}, Bin) -> ?cat(genlib_string:pad_numeric(H, 2));
-format_datetime_part(m       , {_, {_, M, _}}, Bin) -> ?cat(genlib_string:pad_numeric(M, 2));
-format_datetime_part(s       , {_, {_, _, S}}, Bin) -> ?cat(genlib_string:pad_numeric(S, 2));
+format_datetime_part(yyyy    , {{Y, _, _}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(Y, 4));
+format_datetime_part(yy      , {{Y, _, _}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(Y rem 100, 2));
+format_datetime_part(mm      , {{_, M, _}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(M, 2));
+format_datetime_part(dd      , {{_, _, D}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(D, 2));
+format_datetime_part(h       , {_, {H, _, _}}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(H, 2));
+format_datetime_part(m       , {_, {_, M, _}}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(M, 2));
+format_datetime_part(s       , {_, {_, _, S}}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(S, 2));
 
-format_datetime_part(Bin    , _DateTime, Bin) when is_binary(Bin)   -> ?cat(Bin);
-format_datetime_part(String , _DateTime, Bin) when is_list(String)  -> ?cat(list_to_binary(String));
-format_datetime_part(Char   , _DateTime, Bin) when is_integer(Char) -> <<Bin/binary, Char>>.
+format_datetime_part(Bin    , _DateTime, Acc) when is_binary(Bin)   -> ?cat(Acc, Bin);
+format_datetime_part(String , _DateTime, Acc) when is_list(String)  -> ?cat(Acc, list_to_binary(String));
+format_datetime_part(Char   , _DateTime, Acc) when is_integer(Char) -> <<Acc/binary, Char>>.
 
 %%
 
