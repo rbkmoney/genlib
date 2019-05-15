@@ -213,66 +213,68 @@ ntoa(IP) ->
 format_stacktrace(Trace) ->
     format_stacktrace(Trace, []).
 
--spec format_stacktrace([stack_item()], Opts :: [newlines]) -> binary().
+-spec format_stacktrace([stack_item()], [Opt]) -> binary() when
+    Opt :: newlines | {arglist_limit, pos_integer()} | {arglist_depth, pos_integer()}.
 
 format_stacktrace(Trace, Opts) ->
-    try format_stacktrace(Trace, lists:member(newlines, Opts), <<>>) catch
+    try format_stacktrace(Trace, construct_format_opts(Opts), <<>>) catch
         _:_ -> genlib:print(Trace, 640)
     end.
 
--define(MAX_ARGLIST_LENGTH, 64).
+-record(format_opts, {
+    newlines   :: boolean(),
+    args_limit :: pos_integer(),
+    args_depth :: pos_integer() | undefined
+}).
 
-format_stacktrace([], _Opts, Acc) ->
+construct_format_opts(Opts) ->
+    #format_opts{
+        newlines   = proplists:get_value(newlines, Opts),
+        args_limit = proplists:get_value(arglist_limit, Opts, 200),
+        args_depth = proplists:get_value(arglist_depth, Opts)
+    }.
+
+format_stacktrace([], _FmtOpts, Acc) ->
     Acc;
 
-format_stacktrace([{Module, Function, As, Opts} | Rest], Nl, Acc) ->
+format_stacktrace([{Module, Function, As, Opts} | Rest], FmtOpts = #format_opts{newlines = Nl}, Acc) ->
     I = case Acc of
-        <<>>      -> <<"in call to">>;
-        _ when Nl -> <<$\t, "called from">>;
-        _         -> <<"called from">>
+        <<>>      -> <<"in ">>;
+        _ when Nl -> <<$\t, "in ">>;
+        _         -> <<"in ">>
     end,
     E = case Rest of
-        []                -> <<>>;
-        _ when Nl         -> <<$\n>>;
-        _                 -> <<",", $\s>>
+        []        -> <<>>;
+        _ when Nl -> <<$\n>>;
+        _         -> <<", ">>
     end,
     M = atom_to_binary(Module, utf8),
     F = atom_to_binary(Function, utf8),
-    Acc1 = <<Acc/binary, I/binary, " ", M/binary, ":", F/binary>>,
-    Acc2 = format_args(As, Acc1),
+    Acc1 = <<Acc/binary, I/binary, M/binary, ":", F/binary>>,
+    Acc2 = format_args(As, FmtOpts, Acc1),
     Acc3 = format_site(Opts, Acc2),
-    format_stacktrace(Rest, Nl, <<Acc3/binary, E/binary>>).
+    format_stacktrace(Rest, FmtOpts, <<Acc3/binary, E/binary>>).
 
-format_args(Args, Acc) when is_list(Args) ->
-    case genlib:print(Args, ?MAX_ARGLIST_LENGTH) of
-        R when byte_size(R) =:= ?MAX_ARGLIST_LENGTH ->
-            <<_, R0/binary>> = R,
-            case binary:last(R0) of
-                $. -> <<Acc/binary, "(", R0/binary, ")">>;
-                _ -> <<Acc/binary, "(", R0/binary, "...)">>
-            end;
-        R ->
-            R0 = binary:part(R, 1, byte_size(R) - 2),
-            <<Acc/binary, "(", R0/binary, ")">>
-    end;
-
-format_args(Arity, Acc) when is_integer(Arity) ->
+format_args(Args, FmtOpts, Acc) when is_list(Args) ->
+    Bin1 = iolist_to_binary(format_arglist(Args, FmtOpts)),
+    Bin2 = binary:part(Bin1, 1, byte_size(Bin1) - 2),
+    <<Acc/binary, "(", Bin2/binary, ")">>;
+format_args(Arity, _FmtOpts, Acc) when is_integer(Arity) ->
     <<Acc/binary, $/, (integer_to_binary(Arity))/binary>>.
 
+format_arglist(Args, #format_opts{args_depth = undefined, args_limit = L}) ->
+    io_lib:format("~0p", [Args], [{chars_limit, L}]);
+format_arglist(Args, #format_opts{args_depth = D, args_limit = L}) when is_integer(D) ->
+    io_lib:format("~0P", [Args, D], [{chars_limit, L}]).
+
 format_site(Opts, Acc) ->
-    format_site(genlib_opts:get(file, Opts), genlib_opts:get(line, Opts), Acc).
-
-format_site(undefined, _, Acc) ->
-    Acc;
-
-format_site(Filename, undefined, Acc) ->
-    F = genlib:to_binary(Filename),
-    <<Acc/binary, " at ", F/binary>>;
-
-format_site(Filename, Line, Acc) ->
-    F = genlib:to_binary(Filename),
-    L = integer_to_binary(Line),
-    <<Acc/binary, " at ", F/binary, ":", L/binary>>.
+    case genlib_opts:get(line, Opts) of
+        Line when is_integer(Line) ->
+            L = integer_to_binary(Line),
+            <<Acc/binary, " at line ", L/binary>>;
+        undefined ->
+            Acc
+    end.
 
 -spec format_exception(genlib:exception()) ->
     iodata().
