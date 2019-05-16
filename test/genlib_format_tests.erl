@@ -54,8 +54,8 @@ stacktrace_test_() ->
     [
         ?_assertMatch(
             <<
-                "in call to proplists:get_value(dink,drance,[]) at proplists.erl:", _:3/binary, $\n,
-                $\t, "called from genlib_format_tests:", _/binary
+                "in proplists:get_value(dink,drance,[]) at line ", _:3/binary, $\n,
+                $\t, "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 62", $\n, _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
@@ -68,17 +68,36 @@ stacktrace_test_() ->
         ),
         ?_assertMatch(
             <<
-                "in call to ordsets:add_element(1,{4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,..) at ordsets.erl:", _:3/binary, ", "
-                "called from genlib_format_tests:", _/binary
+                "in ordsets:add_element(1,{4,8,15,16,23,...}) at line ", _:3/binary, ", "
+                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 76", _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
                     ordsets:add_element(
                         1,
-                        {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42})
+                        {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}
+                    )
                 catch ?STACKTRACE(_, _, Stacktrace)
                     Stacktrace
-                end
+                end,
+                [{arglist_limit, 20}]
+            )
+        ),
+        ?_assertMatch(
+            <<
+                "in ordsets:add_element(1,{4,8,...}) at line ", _:3/binary, ", "
+                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 93", _/binary
+            >>,
+            genlib_format:format_stacktrace(
+                try
+                    ordsets:add_element(
+                        1,
+                        {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}
+                    )
+                catch ?STACKTRACE(_, _, Stacktrace)
+                    Stacktrace
+                end,
+                [{arglist_depth, 5}]
             )
         )
     ].
