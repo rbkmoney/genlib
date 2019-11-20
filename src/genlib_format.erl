@@ -32,6 +32,7 @@
 -export([parse_numeric/2]).
 -export([parse_datetime_iso8601/1]).
 -export([parse_datetime_iso8601_tz/1]).
+-export([parse_relative_deadline/1]).
 
 -export([uuid_to_bstring/1]).
 
@@ -364,6 +365,30 @@ parse_datetime_iso8601_tz(Bin) ->
             error(badarg)
     end,
     {Datetime, Timezone}.
+
+-spec parse_relative_deadline(binary()) -> integer().
+
+parse_relative_deadline(DeadlineStr) ->
+    %% deadline string like '1ms', '30m', '2.6h' etc
+    case re:split(DeadlineStr, <<"^(\\d+\\.\\d+|\\d+)([a-z]+)$">>) of
+        [<<>>, NumberStr, Unit, <<>>] ->
+            Number = genlib:to_float(NumberStr),
+            parse_relative_deadline(Number, Unit);
+        _Other ->
+            error(badarg, [DeadlineStr])
+    end.
+
+parse_relative_deadline(Number, Unit) ->
+    Factor = unit_factor(Unit),
+    erlang:round(Number * Factor).
+unit_factor(<<"ms">>) ->
+    1;
+unit_factor(<<"s">>) ->
+    1000;
+unit_factor(<<"m">>) ->
+    1000 * 60;
+unit_factor(Other) ->
+    error(badarg, [Other]).
 
 -spec uuid_to_bstring(Value :: uuid()) -> binary().
 

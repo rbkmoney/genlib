@@ -124,3 +124,12 @@ uuid_to_bstring_test_() ->
                                            187, 227, 149, 26, 47, 74>>)
           )
     ].
+
+-spec parse_relative_deadline_test() -> [testcase()].
+parse_relative_deadline_test() ->
+    [
+        ?_assertMatch({ok, {_, _}}, genlib_format:parse_relative_deadline(<<"15s">>)),
+        ?_assertMatch({ok, {_, _}}, genlib_format:parse_relative_deadline(<<"15m">>)),
+        ?_assertMatch(badarg, try genlib_format:parse_relative_deadline(<<"15h">>) catch error:Reason -> Reason end)
+    ].
+    
