@@ -130,6 +130,7 @@ parse_relative_deadline_test() ->
     [
         ?_assertMatch({ok, {_, _}}, genlib_format:parse_relative_deadline(<<"15s">>)),
         ?_assertMatch({ok, {_, _}}, genlib_format:parse_relative_deadline(<<"15m">>)),
+        ?_assertMatch({ok, {_, _}}, genlib_format:parse_relative_deadline(<<"1.5m">>)),
         ?_assertMatch(badarg, try genlib_format:parse_relative_deadline(<<"15h">>) catch error:Reason -> Reason end)
     ].
     
