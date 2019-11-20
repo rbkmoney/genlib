@@ -388,7 +388,7 @@ unit_factor(<<"s">>) ->
 unit_factor(<<"m">>) ->
     1000 * 60;
 unit_factor(Other) ->
-    error(badarg, [Other]).
+    error(invalid_time_unit, [Other]).
 
 -spec uuid_to_bstring(Value :: uuid()) -> binary().
 
