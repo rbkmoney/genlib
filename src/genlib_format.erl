@@ -369,7 +369,7 @@ parse_datetime_iso8601_tz(Bin) ->
 -spec parse_relative_deadline(binary()) -> integer().
 
 parse_relative_deadline(DeadlineStr) ->
-    %% deadline string like '1ms', '30m', '2.6h' etc
+    %% deadline string like '1ms', '30m', '1.5m' etc
     case re:split(DeadlineStr, <<"^(\\d+\\.\\d+|\\d+)([a-z]+)$">>) of
         [<<>>, NumberStr, Unit, <<>>] ->
             Number = genlib:to_float(NumberStr),
