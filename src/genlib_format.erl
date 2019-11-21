@@ -371,7 +371,7 @@ parse_datetime_iso8601_tz(Bin) ->
 parse_timespan(DeadlineStr) ->
     %% deadline string like '1ms', '30m', '1.5m' etc
     case re:run(DeadlineStr, <<"^(\\d+\\.\\d+|\\d+)([a-z]+)$">>, [global, {capture, all_but_first, binary}]) of
-        {match, [NumberStr, Unit]} ->
+        {match, [[NumberStr, Unit]]} ->
             Number = genlib:to_float(NumberStr),
             parse_timespan(Number, Unit);
         _Other ->
