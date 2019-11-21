@@ -125,12 +125,12 @@ uuid_to_bstring_test_() ->
           )
     ].
 
--spec parse_timespan_test() -> [testcase()].
-parse_timespan_test() ->
+-spec parse_timespan_test_() -> [testcase()].
+parse_timespan_test_() ->
     [
-        ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"15s">>)),
-        ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"15m">>)),
-        ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"1.5m">>)),
-        ?_assertError(badarg,       genlib_format:parse_timespan(<<"15h">>))
+        ?_assertEqual(15 * 1000,                              genlib_format:parse_timespan(<<"15s">>)),
+        ?_assertEqual(15 * 60 * 1000,                         genlib_format:parse_timespan(<<"15m">>)),
+        ?_assertEqual(erlang:round(1.5 * 60 * 1000),          genlib_format:parse_timespan(<<"1.5m">>)),
+        ?_assertError({badarg, {invalid_time_unit, <<"h">>}}, genlib_format:parse_timespan(<<"15h">>))
     ].
     
