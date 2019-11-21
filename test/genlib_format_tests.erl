@@ -131,6 +131,6 @@ parse_timespan_test() ->
         ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"15s">>)),
         ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"15m">>)),
         ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"1.5m">>)),
-        ?_assertMatch(badarg, try   genlib_format:parse_timespan(<<"15h">>) catch error:Reason -> Reason end)
+        ?_assertError(badarg,       genlib_format:parse_timespan(<<"15h">>))
     ].
     
