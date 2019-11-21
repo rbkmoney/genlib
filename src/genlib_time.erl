@@ -38,9 +38,11 @@
 
 -type ts() :: pos_integer().
 -type tzoffset() :: {'-' | '+', 0..12, 0..59}.
+-type timespan() :: pos_integer(). % ms
 
 -export_type([ts/0]).
 -export_type([tzoffset/0]).
+-export_type([timespan/0]).
 
 %%
 

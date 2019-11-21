@@ -32,7 +32,7 @@
 -export([parse_numeric/2]).
 -export([parse_datetime_iso8601/1]).
 -export([parse_datetime_iso8601_tz/1]).
--export([parse_relative_deadline/1]).
+-export([parse_timespan/1]).
 
 -export([uuid_to_bstring/1]).
 
@@ -366,19 +366,19 @@ parse_datetime_iso8601_tz(Bin) ->
     end,
     {Datetime, Timezone}.
 
--spec parse_relative_deadline(binary()) -> integer().
+-spec parse_timespan(binary()) -> genlib_time:timespan().
 
-parse_relative_deadline(DeadlineStr) ->
+parse_timespan(DeadlineStr) ->
     %% deadline string like '1ms', '30m', '1.5m' etc
     case re:run(DeadlineStr, <<"^(\\d+\\.\\d+|\\d+)([a-z]+)$">>, [global, {capture, all_but_first, binary}]) of
         {match, [NumberStr, Unit]} ->
             Number = genlib:to_float(NumberStr),
-            parse_relative_deadline(Number, Unit);
+            parse_timespan(Number, Unit);
         _Other ->
             error(badarg, [DeadlineStr])
     end.
 
-parse_relative_deadline(Number, Unit) ->
+parse_timespan(Number, Unit) ->
     Factor = unit_factor(Unit),
     erlang:round(Number * Factor).
 unit_factor(<<"ms">>) ->
