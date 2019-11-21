@@ -124,3 +124,13 @@ uuid_to_bstring_test_() ->
                                            187, 227, 149, 26, 47, 74>>)
           )
     ].
+
+-spec parse_timespan_test() -> [testcase()].
+parse_timespan_test() ->
+    [
+        ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"15s">>)),
+        ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"15m">>)),
+        ?_assertMatch({ok, {_, _}}, genlib_format:parse_timespan(<<"1.5m">>)),
+        ?_assertError(badarg,       genlib_format:parse_timespan(<<"15h">>))
+    ].
+    
