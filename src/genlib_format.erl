@@ -381,6 +381,7 @@ parse_timespan(DeadlineStr) ->
 parse_timespan(Number, Unit) ->
     Factor = unit_factor(Unit),
     erlang:round(Number * Factor).
+
 unit_factor(<<"ms">>) ->
     1;
 unit_factor(<<"s">>) ->
