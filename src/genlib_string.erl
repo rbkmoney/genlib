@@ -199,4 +199,6 @@ redact_match({S, Len}, Subject) ->
     <<Pre:S/binary, Match:Len/binary, Rest/binary>> = Subject,
     <<Pre/binary, (binary:copy(<<"*">>, string:length(Match)))/binary, Rest/binary>>;
 redact_match([Capture], Message) ->
-    redact_match(Capture, Message).
+    redact_match(Capture, Message);
+redact_match([], Message) ->
+    Message.
