@@ -188,15 +188,15 @@ is_equal_icase(S1, S2) ->
 
 -spec redact(Subject :: binary(), Pattern :: binary()) -> Redacted :: binary().
 redact(Subject, Pattern) ->
-    case re:run(Subject, Pattern, [global, {capture, all_but_first, index}]) of
+    case re:run(Subject, Pattern, [global, {capture, all_but_first, index}, unicode, ucp]) of
         {match, Captures} ->
-            lists:foldl(fun redact_match/2, Subject, Captures);
+            lists:foldr(fun redact_match/2, Subject, Captures);
         nomatch ->
             Subject
     end.
 
 redact_match({S, Len}, Subject) ->
-    <<Pre:S/binary, _:Len/binary, Rest/binary>> = Subject,
-    <<Pre/binary, (binary:copy(<<"*">>, Len))/binary, Rest/binary>>;
+    <<Pre:S/binary, Match:Len/binary, Rest/binary>> = Subject,
+    <<Pre/binary, (binary:copy(<<"*">>, string:length(Match)))/binary, Rest/binary>>;
 redact_match([Capture], Message) ->
     redact_match(Capture, Message).
