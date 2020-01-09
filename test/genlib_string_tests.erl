@@ -46,3 +46,22 @@ join_test_() ->
         ?_assertEqual(<<"a:=:b:=:c:=:d:=:e:=:f">> , genlib_string:join(<<":=:">>, lists:seq($a, $f))),
         ?_assertError(_                           , genlib_string:join($:, []))
     ].
+
+-spec redact_test_() -> [testcase()].
+redact_test_() ->
+    [
+        ?_assertEqual(<<>>, genlib_string:redact(<<>>, <<"">>)),
+        ?_assertEqual(<<>>, genlib_string:redact(<<>>, <<"([0-9]{2})">>)),
+        ?_assertEqual(
+            <<"****-**/7">>,
+            genlib_string:redact(<<"2017-01/7">>, <<"([0-9]{2})">>)
+        ),
+        ?_assertEqual(
+            <<"2**7-01/7">>,
+            genlib_string:redact(<<"2017-01/7">>, <<"[0-9]([0-9]{2})[0-9]">>)
+        ),
+        ?_assertEqual(
+            <<"Это ко****о кл****а"/utf8>>,
+            genlib_string:redact(<<"Это конечно клиника"/utf8>>, <<"\\w\\w(\\w{1,10})\\w">>)
+        )
+    ].
