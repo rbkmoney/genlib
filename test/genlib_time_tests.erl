@@ -48,3 +48,69 @@ shift_date_test_() ->
             genlib_time:shift_date({2016, 2, 29}, {0, 0, 365})
         )
     ].
+
+-spec rfc3339_utc_test_() -> [testcase()].
+
+rfc3339_utc_test_() ->
+    [
+        ?_assertEqual(
+            false,
+            genlib_time:is_utc(<<"2020-02-18T15:32:15+03:00">>)
+        ),
+        ?_assertEqual(
+            true,
+            genlib_time:is_utc(<<"2020-02-18T15:32:15-00:00">>)
+        ),
+        ?_assertEqual(
+            true,
+            genlib_time:is_utc(<<"2020-02-18T15:32:15+00:00">>)
+        ),
+        ?_assertEqual(
+            true,
+            genlib_time:is_utc(<<"2020-02-18T15:32:15Z">>)
+        )
+    ].
+
+-spec rfc3339_parse_test_() -> [testcase()].
+
+rfc3339_parse_test_() ->
+    [
+        ?_assertEqual(
+            503640306,
+            genlib_time:parse(<<"1985-12-17T04:05:06.123Z">>, second)
+        ),
+        ?_assertEqual(
+            503640306123,
+            genlib_time:parse(<<"1985-12-17T04:05:06.123456Z">>, millisecond)
+        ),
+        ?_assertEqual(
+            503640306123456,
+            genlib_time:parse(<<"1985-12-17T04:05:06.123456Z">>, microsecond)
+        ),
+        ?_assertEqual(
+            503640306123456789,
+            genlib_time:parse(<<"1985-12-17T04:05:06.123456789Z">>, nanosecond)
+        )
+    ].
+
+-spec rfc3339_format_test_() -> [testcase()].
+
+rfc3339_format_test_() ->
+    [
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06Z">>,
+            genlib_time:format(503640306, second)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123Z">>,
+            genlib_time:format(503640306123, millisecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123456Z">>,
+            genlib_time:format(503640306123456, microsecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123456789Z">>,
+            genlib_time:format(503640306123456789, nanosecond)
+        )
+    ].
