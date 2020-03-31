@@ -48,23 +48,29 @@ executor(F, E) ->
 collect(Workers, Opts) ->
     Timeout = maps:get(timeout, Opts, 5000),
     Deadline = shift_timeout(Timeout, nowms()),
-    lists:map(
-        fun ({process, {PID, MRef}}) ->
-            receive
-                {'DOWN', MRef, process, PID, {ok, Result}} ->
-                    {ok, Result};
-                {'DOWN', MRef, process, PID, {error, Error}} ->
-                    {error, Error};
-                {'DOWN', MRef, process, PID, Result} ->
-                    {error, {exit, Result, []}}
-            after max(0, shift_timeout(Deadline, -nowms())) ->
-                _ = erlang:demonitor(MRef, [flush]),
-                _ = erlang:exit(PID, kill),
-                timeout
-            end
-        end,
-        Workers
-    ).
+    lists:map(fun (E) -> await(E, Deadline) end, Workers).
+
+await({process, {PID, MRef}}, infinity) ->
+    receive
+        {'DOWN', MRef, process, PID, Result} ->
+            map_result(Result)
+    end;
+await({process, {PID, MRef}}, Deadline) ->
+    receive
+        {'DOWN', MRef, process, PID, Result} ->
+            map_result(Result)
+    after max(0, shift_timeout(Deadline, -nowms())) ->
+        _ = erlang:demonitor(MRef, [flush]),
+        _ = erlang:exit(PID, kill),
+        timeout
+    end.
+
+map_result(Result = {ok, _}) ->
+    Result;
+map_result(Result = {error, _}) ->
+    Result;
+map_result(Result) ->
+    {exit, Result, []}.
 
 shift_timeout(infinity, _) ->
     infinity;
