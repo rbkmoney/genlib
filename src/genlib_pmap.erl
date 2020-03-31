@@ -79,5 +79,4 @@ replicate(timeout) ->
     error(timeout).
 
 nowms() ->
-    {Ms, S, Mcs} = os:timestamp(),
-    (Ms * 1000000 + S) * 1000 + Mcs div 1000.
+    erlang:monotonic_time(millisecond).
