@@ -13,7 +13,8 @@
 empty_test_() ->
     [
         ?_assertEqual([], genlib_pmap:map(fun (V) -> V              end, [])),
-        ?_assertEqual([], genlib_pmap:map(fun (_) -> exit(welwalla) end, []))
+        ?_assertEqual([], genlib_pmap:map(fun (_) -> exit(welwalla) end, [])),
+        ?_assertEqual([], genlib_pmap:map(fun (_) -> exit(welwalla) end, [], #{proc_limit => 1}))
     ].
 
 -spec map_test_() -> [testcase()].
@@ -21,7 +22,10 @@ empty_test_() ->
 map_test_() ->
     [
         ?_assertMatch([_, _, _], genlib_pmap:map(fun (_) -> self() end, [1, 2, 3])),
-        ?_assertEqual([3, 2, 1], genlib_pmap:map(fun (V) -> 4 - V end, [1, 2, 3]))
+        ?_assertEqual([3, 2, 1], genlib_pmap:map(fun (V) -> 4 - V end, [1, 2, 3])),
+        ?_assertEqual([3, 2, 1], genlib_pmap:map(fun (V) -> 4 - V end, [1, 2, 3], #{proc_limit => 1})),
+        ?_assertEqual([3, 2, 1], genlib_pmap:map(fun (V) -> 4 - V end, [1, 2, 3], #{proc_limit => 2})),
+        ?_assertEqual([3, 2, 1], genlib_pmap:map(fun (V) -> 4 - V end, [1, 2, 3], #{proc_limit => 4}))
     ].
 
 -spec errorneous_map_test_() -> [testcase()].
@@ -33,6 +37,14 @@ errorneous_map_test_() ->
             genlib_pmap:map(
                 fun (V) -> integer_to_list(V) end,
                 [1, haha, 3]
+            )
+        ),
+        ?_assertError(
+            badarg,
+            genlib_pmap:map(
+                fun (V) -> integer_to_list(V) end,
+                [1, haha, 3, haha, hehe],
+                #{proc_limit => 3}
             )
         ),
         ?_assertError(
@@ -54,6 +66,14 @@ errorneous_map_test_() ->
             genlib_pmap:map(
                 fun (V) -> case V rem 2 of 0 -> exit({bad, V}); _ -> ok end end,
                 [1, 2, 3]
+            )
+        ),
+        ?_assertExit(
+            {bad, 2},
+            genlib_pmap:map(
+                fun (V) -> case V rem 2 of 0 -> exit({bad, V}); _ -> ok end end,
+                [1, 2, 3],
+                #{proc_limit => 2}
             )
         )
     ].
@@ -105,6 +125,38 @@ speedup_test_() ->
         measure(genlib_pmap, map, [
             fun (_) -> timer:sleep(T) end,
             lists:seq(1, N)
+        ])
+    ).
+
+-spec proc_limit_test_() -> [testcase()].
+
+proc_limit_test_() ->
+    N = 1000,
+    Limit = 64,
+    NumProcs0 = length(erlang:processes()),
+    NumProcs1 = lists:max(genlib_pmap:map(
+        fun (_) -> length(erlang:processes()) end,
+        lists:seq(1, N),
+        #{proc_limit => 64}
+    )),
+    ?_assertEqual(
+        Limit,
+        NumProcs1 - NumProcs0
+    ).
+
+-spec fair_distrib_test_() -> [testcase()].
+
+fair_distrib_test_() ->
+    N = 100,
+    T = 100,
+    Limit = 42,
+    ConstOverhead = 100,
+    ?_assert(
+        (T * N / Limit) + ConstOverhead >
+        measure(genlib_pmap, map, [
+            fun (_) -> timer:sleep(T) end,
+            lists:seq(1, N),
+            #{proc_limit => Limit}
         ])
     ).
 
