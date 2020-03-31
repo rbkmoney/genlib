@@ -98,6 +98,29 @@ safemap_test_() ->
         )
     ].
 
+-spec no_leftovers_test() -> _.
+
+no_leftovers_test() ->
+    N = 10,
+    Ns = lists:seq(1, N),
+    TestPid = self(),
+    RunnerPid = erlang:spawn(fun () ->
+        genlib_pmap:map(
+            fun (_) ->
+                _ = TestPid ! {worker, self()},
+                timer:sleep(infinity)
+            end,
+            Ns
+        )
+    end),
+    WorkerPids = [receive {worker, Pid} -> Pid end || _ <- Ns],
+    _ = exit(RunnerPid, enough),
+    _ = timer:sleep(100), % lazy, i know
+    ?assertEqual(
+        lists:duplicate(N, false),
+        [erlang:is_process_alive(Pid) || Pid <- WorkerPids]
+    ).
+
 -spec timeout_test_() -> [testcase()].
 
 timeout_test_() ->
