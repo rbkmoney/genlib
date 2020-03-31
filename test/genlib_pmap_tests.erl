@@ -101,14 +101,24 @@ safemap_test_() ->
 -spec timeout_test_() -> [testcase()].
 
 timeout_test_() ->
-    ?_assertEqual(
-        [{ok, ok}, {ok, ok}, timeout, timeout, timeout],
-        genlib_pmap:safemap(
-            fun (V) -> timer:sleep(V * 100) end,
-            [1, 2, 3, 4, 5],
-            #{timeout => 250}
+    [
+        ?_assertEqual(
+            [{ok, ok}, {ok, ok}, timeout, timeout, timeout, {ok, ok}, {ok, ok}, timeout, timeout],
+            genlib_pmap:safemap(
+                fun (V) -> timer:sleep(V * 100) end,
+                [1, 2, 3, 4, 5, 1, 2, 3, 4],
+                #{timeout => 250}
+            )
+        ),
+        ?_assertEqual(
+            [timeout, timeout, timeout, timeout, timeout, timeout, timeout, timeout, timeout],
+            genlib_pmap:safemap(
+                fun (V) -> timer:sleep(V * 100) end,
+                [1, 2, 3, 4, 5, 1, 2, 3, 4],
+                #{timeout => 500, proc_limit => 3}
+            )
         )
-    ).
+    ].
 
 -spec speedup_test_() -> [testcase()].
 

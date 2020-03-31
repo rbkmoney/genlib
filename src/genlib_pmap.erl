@@ -7,7 +7,9 @@
 
 -type result(T) :: {ok, T} | {error, _} | timeout.
 -type opts() :: #{
+    % Soft limit for duration of _whole operation_, not of a single functor call.
     timeout    => timeout(),
+    % Hard limit for a number of processes to spin.
     proc_limit => pos_integer()
 }.
 
@@ -61,13 +63,15 @@ executor_one(F) ->
     end.
 
 spawn_executor(Executor, F, E, Extra) ->
-    {erlang:spawn_opt(moribound(Executor, F, E), [monitor]), Extra}.
-
--spec moribound(fun((_, _) -> _), fun(), _) -> % treat for dialyzer
-    fun(() -> no_return()).
-
-moribound(Executor, F, E) ->
-    fun () -> erlang:exit(Executor(F, E)) end.
+    Pid = erlang:self(),
+    Ref = erlang:make_ref(),
+    % NOTE
+    % It should be safe _unless_ user supplied function decides to kill `self()`.
+    WorkerPid = erlang:spawn_link(fun () ->
+        _ = Pid ! {Ref, Executor(F, E)},
+        ok
+    end),
+    {{WorkerPid, Ref}, Extra}.
 
 -spec execute_one(fun((A) -> B), A) -> result(B).
 
@@ -86,22 +90,49 @@ execute_many(F, L) ->
 collect(Collector, Workers, Opts) ->
     Timeout = maps:get(timeout, Opts, 5000),
     Deadline = shift_timeout(Timeout, nowms()),
-    Results = lists:foldl(fun ({W, Extra}, Acc) -> await(W, Extra, Deadline, Collector, Acc) end, [], Workers),
+    Results = case Deadline of
+        infinity ->
+            await(Collector, Workers, []);
+        Deadline ->
+            await_deadline(Deadline, Collector, Workers, [], [])
+    end,
     lists:reverse(Results).
 
-await({PID, MRef}, Extra, infinity, Collector, Acc) ->
+await(Collector, [{{_, Ref}, Extra} | WorkersLeft], Results) ->
     receive
-        {'DOWN', MRef, process, PID, Result} ->
-            Collector(Result, Extra, Acc)
+        {Ref, Result} ->
+            await(Collector, WorkersLeft, Collector(Result, Extra, Results))
     end;
-await({PID, MRef}, Extra, Deadline, Collector, Acc) ->
+await(_Collector, [], Results) ->
+    Results.
+
+await_deadline(Deadline, Collector, [{{PID, Ref}, Extra} | WorkersLeft], Results, Stuck) ->
     receive
-        {'DOWN', MRef, process, PID, Result} ->
-            Collector(Result, Extra, Acc)
+        {Ref, Result} ->
+            await_deadline(Deadline, Collector, WorkersLeft, Collector(Result, Extra, Results), Stuck)
     after max(0, shift_timeout(Deadline, -nowms())) ->
-        _ = erlang:demonitor(MRef, [flush]),
-        _ = erlang:exit(PID, kill),
-        Collector(timeout, Extra, Acc)
+        await_deadline(Deadline, Collector, WorkersLeft, Collector(timeout, Extra, Results), [PID | Stuck])
+    end;
+await_deadline(_Deadline, _Collector, [], Results, Stuck) ->
+    ok = discharge(Stuck),
+    Results.
+
+discharge(Stuck = [_ | _]) ->
+    FlagWas = erlang:process_flag(trap_exit, true),
+    ok = lists:foreach(fun (PID) -> erlang:exit(PID, kill) end, Stuck),
+    ok = lists:foreach(fun (PID) -> receive {'EXIT', PID, killed} -> ok end end, Stuck),
+    _ = erlang:process_flag(trap_exit, FlagWas),
+    ok = handle_trapped_exits(),
+    ok;
+discharge([]) ->
+    ok.
+
+handle_trapped_exits() ->
+    receive
+        {'EXIT', _PID, normal} -> handle_trapped_exits();
+        {'EXIT', _PID, Reason} -> erlang:exit(Reason)
+    after 0 ->
+        ok
     end.
 
 collect_one(Result = {ok, _}, _, Acc) ->
