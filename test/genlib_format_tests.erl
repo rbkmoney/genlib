@@ -54,7 +54,8 @@ stacktrace_test_() ->
         ?_assertMatch(
             <<
                 "in proplists:get_value(dink,drance,[]) at line ", _:3/binary, $\n,
-                $\t, "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 62", $\n, _/binary
+                $\t, "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary, $\n,
+                _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
@@ -68,7 +69,8 @@ stacktrace_test_() ->
         ?_assertMatch(
             <<
                 "in ordsets:add_element(1,{4,8,15,16,23,...}) at line ", _:3/binary, ", "
-                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 76", _/binary
+                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary,
+                _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
@@ -85,7 +87,8 @@ stacktrace_test_() ->
         ?_assertMatch(
             <<
                 "in ordsets:add_element(1,{4,8,...}) at line ", _:3/binary, ", "
-                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 93", _/binary
+                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary,
+                _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
