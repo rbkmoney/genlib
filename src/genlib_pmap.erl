@@ -61,10 +61,13 @@ executor_one(F) ->
     end.
 
 spawn_executor(Executor, F, E, Extra) ->
-    {erlang:spawn_opt(
-        fun () -> erlang:exit(Executor(F, E)) end,
-        [monitor]
-    ), Extra}.
+    {erlang:spawn_opt(moribound(Executor, F, E), [monitor]), Extra}.
+
+-spec moribound(fun((_, _) -> _), fun(), _) -> fun(() -> % treat for dialyzer
+    no_return()).
+
+moribound(Executor, F, E) ->
+    fun () -> erlang:exit(Executor(F, E)) end.
 
 -spec execute_one(fun((A) -> B), A) -> result(B).
 
