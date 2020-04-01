@@ -122,8 +122,10 @@ discharge(Stuck = [_ | _]) ->
     ok = lists:foreach(fun (PID) -> erlang:exit(PID, kill) end, Stuck),
     ok = lists:foreach(fun (PID) -> receive {'EXIT', PID, killed} -> ok end end, Stuck),
     _ = erlang:process_flag(trap_exit, FlagWas),
-    ok = handle_trapped_exits(),
-    ok;
+    case FlagWas of
+        false -> handle_trapped_exits();
+        true  -> ok
+    end;
 discharge([]) ->
     ok.
 
