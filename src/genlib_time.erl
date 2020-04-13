@@ -31,12 +31,6 @@
 
 -export([get_timezone/0]).
 
--export([
-    is_utc/1,
-    format/2,
-    parse/2
-]).
-
 %%
 
 %% There is 62167219200 seconds between Jan 1, 0 and Jan 1, 1970.
@@ -46,18 +40,9 @@
 -type tzoffset() :: {'-' | '+', 0..12, 0..59}.
 -type timespan() :: pos_integer(). % ms
 
--type rfc3339_datetime() :: binary().
--type rfc3339_time_unit() :: microsecond % unfortunately not exported from calendar module
-                           | millisecond
-                           | nanosecond
-                           | second.
-
 -export_type([ts/0]).
 -export_type([tzoffset/0]).
 -export_type([timespan/0]).
-
--export_type([rfc3339_datetime/0]).
--export_type([rfc3339_time_unit/0]).
 
 %%
 
@@ -190,34 +175,3 @@ get_timezone() ->
     MinuteDiff = (daytime_to_unixtime(Now) - daytime_to_unixtime(UNow)) div 60,
     Sign = if MinuteDiff < 0 -> '-'; true -> '+' end,
     {Sign, abs(MinuteDiff) div 60, abs(MinuteDiff) rem 60}.
-
-%%
-
--spec is_utc(rfc3339_datetime()) -> boolean().
-
-is_utc(Rfc3339) when is_binary(Rfc3339) ->
-    Size0 = erlang:byte_size(Rfc3339),
-    Size1 = Size0 - 1,
-    Size6 = Size0 - 6,
-    case Rfc3339 of
-        <<_:Size1/bytes, "Z">> ->
-            true;
-        <<_:Size6/bytes, "+00:00">> ->
-            true;
-        <<_:Size6/bytes, "-00:00">> ->
-            true;
-        _ ->
-            false
-    end.
-
--spec format(integer(), rfc3339_time_unit()) -> rfc3339_datetime().
-
-format(Value, Unit) when is_integer(Value) andalso is_atom(Unit) ->
-    Str = calendar:system_time_to_rfc3339(Value, [{unit, Unit}, {offset, "Z"}]),
-    erlang:list_to_binary(Str).
-
--spec parse(rfc3339_datetime(), rfc3339_time_unit()) -> integer().
-
-parse(Rfc3339, Unit) when is_binary(Rfc3339) andalso is_atom(Unit) ->
-    Str = erlang:binary_to_list(Rfc3339),
-    calendar:rfc3339_to_system_time(Str, [{unit, Unit}]).
