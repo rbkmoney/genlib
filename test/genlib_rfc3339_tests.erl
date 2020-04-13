@@ -22,9 +22,9 @@
 
 -spec test() -> _.
 
--spec rfc3339_utc_test_() -> [testcase()].
+-spec utc_test_() -> [testcase()].
 
-rfc3339_utc_test_() ->
+utc_test_() ->
     [
         ?_assertEqual(
             false,
@@ -44,9 +44,9 @@ rfc3339_utc_test_() ->
         )
     ].
 
--spec rfc3339_parse_test_() -> [testcase()].
+-spec parse_test_() -> [testcase()].
 
-rfc3339_parse_test_() ->
+parse_test_() ->
     [
         ?_assertEqual(
             503640306,
@@ -66,9 +66,9 @@ rfc3339_parse_test_() ->
         )
     ].
 
--spec rfc3339_format_test_() -> [testcase()].
+-spec format_test_() -> [testcase()].
 
-rfc3339_format_test_() ->
+format_test_() ->
     [
         ?_assertEqual(
             <<"1985-12-17T04:05:06Z">>,
