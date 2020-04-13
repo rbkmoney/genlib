@@ -2,7 +2,6 @@
 
 -module(genlib_format_tests).
 
--include("otp_19_compatibility.hrl").
 -include_lib("eunit/include/eunit.hrl").
 
 -spec test() -> _.
@@ -55,12 +54,13 @@ stacktrace_test_() ->
         ?_assertMatch(
             <<
                 "in proplists:get_value(dink,drance,[]) at line ", _:3/binary, $\n,
-                $\t, "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 62", $\n, _/binary
+                $\t, "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary, $\n,
+                _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
                     proplists:get_value(dink, drance, [])
-                catch ?STACKTRACE(_, _, Stacktrace)
+                catch _:_:Stacktrace ->
                     Stacktrace
                 end,
                 [newlines]
@@ -69,7 +69,8 @@ stacktrace_test_() ->
         ?_assertMatch(
             <<
                 "in ordsets:add_element(1,{4,8,15,16,23,...}) at line ", _:3/binary, ", "
-                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 76", _/binary
+                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary,
+                _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
@@ -77,7 +78,7 @@ stacktrace_test_() ->
                         1,
                         {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}
                     )
-                catch ?STACKTRACE(_, _, Stacktrace)
+                catch _:_:Stacktrace ->
                     Stacktrace
                 end,
                 [{arglist_limit, 20}]
@@ -86,7 +87,8 @@ stacktrace_test_() ->
         ?_assertMatch(
             <<
                 "in ordsets:add_element(1,{4,8,...}) at line ", _:3/binary, ", "
-                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line 93", _/binary
+                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary,
+                _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
@@ -94,7 +96,7 @@ stacktrace_test_() ->
                         1,
                         {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}
                     )
-                catch ?STACKTRACE(_, _, Stacktrace)
+                catch _:_:Stacktrace ->
                     Stacktrace
                 end,
                 [{arglist_depth, 5}]
@@ -133,4 +135,3 @@ parse_timespan_test_() ->
         ?_assertEqual(erlang:round(1.5 * 60 * 1000),          genlib_format:parse_timespan(<<"1.5m">>)),
         ?_assertError({badarg, {invalid_time_unit, <<"h">>}}, genlib_format:parse_timespan(<<"15h">>))
     ].
-    
