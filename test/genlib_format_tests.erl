@@ -34,20 +34,6 @@ datetime_test_() ->
         ?_assertEqual(<<"17/01/89">>, genlib_format:format_date([dd, $/, mm, $/, yy], {1989, 1, 17}))
     ].
 
--spec iso8601_test_() -> [testcase()].
-iso8601_test_() ->
-    [
-        ?_assertEqual(<<"2012-12-22T00:04:33Z">>, genlib_format:format_datetime_iso8601({{2012, 12, 22}, {0, 4, 33}})),
-        ?_assertEqual(<<"2012-12-22T04:34:33+04:30">>, genlib_format:format_datetime_iso8601_tz({{2012, 12, 22}, {4, 34, 33}}, {'+', 4, 30}))
-    ].
-
--spec timestamp_test_() -> [testcase()].
-timestamp_test_() ->
-    [
-        ?_assertEqual(<<"2012-12-22T00:04:33Z">>, genlib_format:format_timestamp_iso8601(1356134673)),
-        ?_assertEqual(<<"2012-12-22T04:34:33+04:30">>, genlib_format:format_timestamp_iso8601_tz(1356150873, {'+', 4, 30}))
-    ].
-
 -spec stacktrace_test_() -> [testcase()].
 stacktrace_test_() ->
     [
