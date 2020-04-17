@@ -87,3 +87,57 @@ format_test_() ->
             genlib_rfc3339:format(503640306123456789, nanosecond)
         )
     ].
+
+-spec format_relaxed_test_() -> [testcase()].
+
+format_relaxed_test_() ->
+    [
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06Z">>,
+            genlib_rfc3339:format_relaxed(503640306, second)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123Z">>,
+            genlib_rfc3339:format_relaxed(503640306123, millisecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123456Z">>,
+            genlib_rfc3339:format_relaxed(503640306123456, microsecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123456789Z">>,
+            genlib_rfc3339:format_relaxed(503640306123456789, nanosecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123456Z">>,
+            genlib_rfc3339:format_relaxed(503640306123456000, nanosecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123Z">>,
+            genlib_rfc3339:format_relaxed(503640306123000, microsecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06Z">>,
+            genlib_rfc3339:format_relaxed(503640306000, millisecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.200Z">>,
+            genlib_rfc3339:format_relaxed(503640306200, millisecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.210Z">>,
+            genlib_rfc3339:format_relaxed(503640306210, millisecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06Z">>,
+            genlib_rfc3339:format_relaxed(503640306000000000, nanosecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.123Z">>,
+            genlib_rfc3339:format_relaxed(503640306123000000, nanosecond)
+        ),
+        ?_assertEqual(
+            <<"1985-12-17T04:05:06.100Z">>,
+            genlib_rfc3339:format_relaxed(503640306100000000, nanosecond)
+        )
+    ].

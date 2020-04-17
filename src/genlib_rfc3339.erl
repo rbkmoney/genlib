@@ -20,6 +20,7 @@
 -export([
     is_utc/1,
     format/2,
+    format_relaxed/2,
     parse/2
 ]).
 
@@ -49,6 +50,12 @@ is_utc(Rfc3339) when is_binary(Rfc3339) ->
             false
     end.
 
+-spec format_relaxed(integer(), time_unit()) -> datetime().
+
+format_relaxed(Value, Unit) when is_integer(Value) andalso is_atom(Unit) ->
+    {AdjTime, AdjUnit} = adjust_time_unit(Value, Unit),
+    format(AdjTime, AdjUnit).
+
 -spec format(integer(), time_unit()) -> datetime().
 
 format(Value, Unit) when is_integer(Value) andalso is_atom(Unit) ->
@@ -60,3 +67,19 @@ format(Value, Unit) when is_integer(Value) andalso is_atom(Unit) ->
 parse(Rfc3339, Unit) when is_binary(Rfc3339) andalso is_atom(Unit) ->
     Str = erlang:binary_to_list(Rfc3339),
     calendar:rfc3339_to_system_time(Str, [{unit, Unit}]).
+
+adjust_time_unit(Value, second) ->
+    {Value, second};
+adjust_time_unit(Value, Unit) ->
+    case Value rem 1000 of
+        0 ->
+            NextFactor = next_time_unit(Unit),
+            NextValue = erlang:convert_time_unit(Value, Unit, NextFactor),
+            adjust_time_unit(NextValue, NextFactor);
+        _ ->
+            {Value, Unit}
+    end.
+
+next_time_unit(nanosecond) -> microsecond;
+next_time_unit(microsecond) -> millisecond;
+next_time_unit(millisecond) -> second.
