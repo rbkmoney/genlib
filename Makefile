@@ -8,7 +8,7 @@ compile:
 	$(REBAR) compile
 
 test:
-	$(REBAR) eunit
+	$(REBAR) do eunit, proper
 
 clean:
 	$(REBAR) clean
