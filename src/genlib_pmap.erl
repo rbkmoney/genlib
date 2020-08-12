@@ -120,7 +120,7 @@ await_deadline(_Deadline, _Collector, [], Results, Stuck) ->
 discharge(Stuck = [_ | _]) ->
     FlagWas = erlang:process_flag(trap_exit, true),
     ok = lists:foreach(fun (PID) -> erlang:exit(PID, kill) end, Stuck),
-    ok = lists:foreach(fun (PID) -> receive {'EXIT', PID, killed} -> ok end end, Stuck),
+    ok = lists:foreach(fun (PID) -> receive {'EXIT', PID, _Reason} -> ok end end, Stuck),
     _ = erlang:process_flag(trap_exit, FlagWas),
     case FlagWas of
         false -> handle_trapped_exits();
