@@ -13,6 +13,8 @@
     proc_limit => pos_integer()
 }.
 
+ -dialyzer({nowarn_function, [spawn_fuse/1]}).
+
 -spec map(fun((A) -> B), [A]) ->
     [B].
 -spec map(fun((A) -> B), [A], opts()) ->
@@ -55,6 +57,8 @@ spawn_fuse(Opts) ->
     Timeout = maps:get(timeout, Opts, 5000),
     erlang:spawn(fun () -> fuse(Pid, Timeout) end).
 
+-spec fuse(pid(), timeout()) ->
+    no_return().
 fuse(Pid, Timeout) ->
     _Was = erlang:process_flag(trap_exit, true),
     MRef = erlang:monitor(process, Pid),
