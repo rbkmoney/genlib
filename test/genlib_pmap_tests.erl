@@ -119,7 +119,40 @@ no_leftovers_test() ->
     ?assertEqual(
         lists:duplicate(N, false),
         [erlang:is_process_alive(Pid) || Pid <- WorkerPids]
-    ).
+    ),
+    ?assertEqual([], flush()).
+
+-spec empty_mailbox_test_() -> [testcase()].
+
+empty_mailbox_test_() ->
+    Sleeper = fun (V) -> timer:sleep(V * 100) end,
+    Es = [1, 2, 3, 4, 5, 1, 2, 3, 4],
+    [
+        ?_assertEqual(
+            [],
+            begin
+                genlib_pmap:map(Sleeper, Es),
+                flush()
+            end
+        ),
+        ?_assertEqual(
+            [],
+            begin
+                genlib_pmap:safemap(Sleeper, Es, #{timeout => 250}),
+                flush()
+            end
+        ),
+        ?_assertEqual(
+            [],
+            begin
+                genlib_pmap:safemap(Sleeper, Es, #{timeout => 0}),
+                flush()
+            end
+        )
+    ].
+
+flush() ->
+    receive M -> [M | flush()] after 100 -> [] end.
 
 -spec timeout_test_() -> [testcase()].
 
@@ -139,6 +172,14 @@ timeout_test_() ->
                 fun (V) -> timer:sleep(V * 100) end,
                 [1, 2, 3, 4, 5, 1, 2, 3, 4],
                 #{timeout => 500, proc_limit => 3}
+            )
+        ),
+        ?_assertEqual(
+            [timeout, timeout, timeout, timeout, timeout, timeout, timeout, timeout, timeout],
+            genlib_pmap:safemap(
+                fun (V) -> timer:sleep(V * 100) end,
+                [1, 2, 3, 4, 5, 1, 2, 3, 4],
+                #{timeout => 0}
             )
         )
     ].
@@ -170,11 +211,11 @@ proc_limit_test_() ->
     NumProcs1 = lists:max(genlib_pmap:map(
         fun (_) -> length(erlang:processes()) end,
         lists:seq(1, N),
-        #{proc_limit => 64}
+        #{proc_limit => Limit}
     )),
-    ?_assertEqual(
-        Limit,
-        NumProcs1 - NumProcs0
+    ?_assert(
+        (Limit - 1 =< NumProcs1 - NumProcs0) andalso
+        (NumProcs1 - NumProcs0 =< Limit + 1)
     ).
 
 -spec fair_distrib_test_() -> [testcase()].
