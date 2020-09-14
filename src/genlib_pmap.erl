@@ -13,8 +13,6 @@
     proc_limit => pos_integer()
 }.
 
- -dialyzer({nowarn_function, [spawn_fuse/1]}).
-
 -spec map(fun((A) -> B), [A]) ->
     [B].
 -spec map(fun((A) -> B), [A], opts()) ->
@@ -55,20 +53,22 @@ safemap(F, L, Opts) ->
 spawn_fuse(Opts) ->
     Pid = erlang:self(),
     Timeout = maps:get(timeout, Opts, 5000),
-    erlang:spawn(fun () -> fuse(Pid, Timeout) end).
+    erlang:spawn(fuse(Pid, Timeout)).
 
 -spec fuse(pid(), timeout()) ->
-    no_return().
+    fun(() -> no_return()).
 fuse(Pid, Timeout) ->
-    _Was = erlang:process_flag(trap_exit, true),
-    MRef = erlang:monitor(process, Pid),
-    receive
-        {'EXIT', Pid, Reason} ->
-            exit(Reason);
-        {'DOWN', MRef, process, Pid, Reason} ->
-            exit(Reason)
-    after Timeout ->
-        exit(timeout)
+    fun () ->
+        _Was = erlang:process_flag(trap_exit, true),
+        MRef = erlang:monitor(process, Pid),
+        receive
+            {'EXIT', Pid, Reason} ->
+                exit(Reason);
+            {'DOWN', MRef, process, Pid, Reason} ->
+                exit(Reason)
+        after Timeout ->
+            exit(timeout)
+        end
     end.
 
 distribute(_, _, [], _Size, Limit, Limit) ->
