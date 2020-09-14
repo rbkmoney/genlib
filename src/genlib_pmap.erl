@@ -36,16 +36,28 @@ safemap(F, L) ->
     safemap(F, L, #{}).
 
 safemap(F, L, Opts) ->
+    % First of all we spawn a _fuse process_ responsible for killing itself when:
+    % * either timeout specified in `Opts` passes,
+    % * or current process terminates for some reason.
+    % Later on we link each worker process with this fuse process so that no worker would outlive
+    % neither specified timeout nor current process.
     Fuse = spawn_fuse(Opts),
     Results = case maps:get(proc_limit, Opts, undefined) of
         undefined ->
+            % Number of workers is unbounded.
+            % Spawn one worker per each unit of work.
             collect(fun collect_one/3, lists:map(executor_one(F, Fuse), L));
         Limit ->
             Size = erlang:length(L),
             if
                 Limit >= Size ->
+                    % Number of workers is bounded yet greater than the size of workload.
+                    % Again, spawn one worker per each unit of work.
                     collect(fun collect_one/3, lists:map(executor_one(F, Fuse), L));
                 Limit < Size ->
+                    % Number of workers is bounded.
+                    % Distribute workload between this number of workers so that each
+                    % would get their fair share right at the start.
                     collect(fun collect_many/3, distribute(F, Fuse, L, Size, Limit, 0))
             end
     end,
@@ -61,14 +73,22 @@ spawn_fuse(Opts) ->
     fun(() -> no_return()).
 fuse(Pid, Timeout) ->
     fun () ->
+        % NOTE
+        % We need to trap exits here to be unaffected by worker processes terminating upon
+        % completion. This in turn makes the process message queue grow in size because for
+        % simplicity we _do not_ consume these messages. However memory requirements are already
+        % roughly O(n) so this should not make much difference.
         _Was = erlang:process_flag(trap_exit, true),
         MRef = erlang:monitor(process, Pid),
         receive
             {'EXIT', Pid, Reason} ->
+                % Coordinating process ordered us to terminate.
                 exit(Reason);
             {'DOWN', MRef, process, Pid, Reason} ->
+                % Coordinating process terminated for some external reason.
                 exit(Reason)
         after Timeout ->
+            % Timeout passed. It's time to send exit signals to all workers still alive.
             exit(timeout)
         end
     end.
@@ -129,6 +149,10 @@ await(Collector, [{{{WorkerPid, MRef}, Ref}, Extra} | WorkersLeft], Results) ->
             await(Collector, WorkersLeft, Collector(Result, Extra, Results));
         {'DOWN', MRef, process, WorkerPid, Reason} ->
             Result = case Reason of
+                % NOTE
+                % Getting `noproc` here means that the fuse process was already dead at the time of
+                % linking. We interpret it as a timeout condition  which appears to be the only
+                % valid interpretation here.
                 {noproc, _} -> timeout;
                 _           -> Reason
             end,
