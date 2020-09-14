@@ -13,6 +13,8 @@
     proc_limit => pos_integer()
 }.
 
+-define(DEFAULT_SAFEMAP_TIMEOUT, 5000).
+
 -spec map(fun((A) -> B), [A]) ->
     [B].
 -spec map(fun((A) -> B), [A], opts()) ->
@@ -52,7 +54,7 @@ safemap(F, L, Opts) ->
 
 spawn_fuse(Opts) ->
     Pid = erlang:self(),
-    Timeout = maps:get(timeout, Opts, 5000),
+    Timeout = maps:get(timeout, Opts, ?DEFAULT_SAFEMAP_TIMEOUT),
     erlang:spawn(fuse(Pid, Timeout)).
 
 -spec fuse(pid(), timeout()) ->
