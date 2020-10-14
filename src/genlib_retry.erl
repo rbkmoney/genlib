@@ -17,10 +17,10 @@
 -type retries_num() :: pos_integer() | infinity.
 
 -opaque strategy() ::
-      {linear     , Retries::retries_num(), Timeout::pos_integer()}
-    | {exponential, Retries::retries_num(), Factor::number(), Timeout::pos_integer(), MaxTimeout::timeout()}
-    | {array      , Array::list(pos_integer())}
-    | {timecap    , Start::pos_integer(), Finish::pos_integer(), strategy()}
+    {linear, Retries :: retries_num(), Timeout :: pos_integer()}
+    | {exponential, Retries :: retries_num(), Factor :: number(), Timeout :: pos_integer(), MaxTimeout :: timeout()}
+    | {array, Array :: list(pos_integer())}
+    | {timecap, Start :: pos_integer(), Finish :: pos_integer(), strategy()}
     | finish.
 
 %%
@@ -30,51 +30,45 @@
 -define(is_max_total_timeout(V), (is_integer(V) andalso V >= 0)).
 
 -spec linear(retries_num() | {max_total_timeout, pos_integer()}, pos_integer()) -> strategy().
-
 linear(Retries, Timeout) when
     ?is_retries(Retries) andalso
-    ?is_posint(Timeout)
+        ?is_posint(Timeout)
 ->
     {linear, Retries, Timeout};
-
 linear(Retries = {max_total_timeout, MaxTotalTimeout}, Timeout) when
     ?is_max_total_timeout(MaxTotalTimeout) andalso
-    ?is_posint(Timeout) ->
+        ?is_posint(Timeout)
+->
     {linear, compute_retries(linear, Retries, Timeout), Timeout}.
 
 -spec exponential(retries_num() | {max_total_timeout, pos_integer()}, number(), pos_integer()) -> strategy().
-
 exponential(Retries, Factor, Timeout) when
     ?is_posint(Timeout) andalso
-    Factor > 0
+        Factor > 0
 ->
     exponential(Retries, Factor, Timeout, infinity).
 
 -spec exponential(retries_num() | {max_total_timeout, pos_integer()}, number(), pos_integer(), timeout()) -> strategy().
-
 exponential(Retries, Factor, Timeout, MaxTimeout) when
     ?is_retries(Retries) andalso
-    ?is_posint(Timeout) andalso
-    Factor > 0 andalso
-    (MaxTimeout =:= infinity orelse ?is_posint(MaxTimeout))
+        ?is_posint(Timeout) andalso
+        Factor > 0 andalso
+        (MaxTimeout =:= infinity orelse ?is_posint(MaxTimeout))
 ->
     {exponential, Retries, Factor, Timeout, MaxTimeout};
-
 exponential(Retries = {max_total_timeout, MaxTotalTimeout}, Factor, Timeout, MaxTimeout) when
     ?is_max_total_timeout(MaxTotalTimeout) andalso
-    ?is_posint(Timeout) andalso
-    Factor > 0 andalso
-    (MaxTimeout =:= infinity orelse ?is_posint(MaxTimeout))
+        ?is_posint(Timeout) andalso
+        Factor > 0 andalso
+        (MaxTimeout =:= infinity orelse ?is_posint(MaxTimeout))
 ->
     {exponential, compute_retries(exponential, Retries, {Factor, Timeout, MaxTimeout}), Factor, Timeout, MaxTimeout}.
 
 -spec intervals([pos_integer(), ...]) -> strategy().
-
 intervals(Array = [Timeout | _]) when ?is_posint(Timeout) ->
     {array, Array}.
 
 -spec timecap(MaxTimeToSpend :: timeout(), strategy()) -> strategy().
-
 timecap(infinity, Strategy) ->
     Strategy;
 timecap(MaxTimeToSpend, Strategy) when ?is_posint(MaxTimeToSpend) ->
@@ -85,24 +79,20 @@ timecap(_, _Strategy) ->
 
 %%
 
--spec next_step(strategy()) -> {wait, Timeout::pos_integer(), strategy()} | finish.
-
+-spec next_step(strategy()) -> {wait, Timeout :: pos_integer(), strategy()} | finish.
 next_step({linear, Retries, Timeout}) when Retries > 0 ->
     {wait, Timeout, {linear, release_retry(Retries), Timeout}};
 next_step({linear, _, _}) ->
     finish;
-
 next_step({exponential, Retries, Factor, Timeout, MaxTimeout}) when Retries > 0 ->
     NewTimeout = min(round(Timeout * Factor), MaxTimeout),
     {wait, Timeout, {exponential, release_retry(Retries), Factor, NewTimeout, MaxTimeout}};
 next_step({exponential, _, _, _, _}) ->
     finish;
-
 next_step({array, []}) ->
     finish;
-next_step({array, [Timeout|Remain]}) ->
+next_step({array, [Timeout | Remain]}) ->
     {wait, Timeout, {array, Remain}};
-
 next_step({timecap, Last, Deadline, Strategy}) ->
     Now = now_ms(),
     case next_step(Strategy) of
@@ -116,10 +106,8 @@ next_step({timecap, Last, Deadline, Strategy}) ->
         finish ->
             finish
     end;
-
 next_step(finish) ->
     finish;
-
 next_step(Strategy) ->
     error(badarg, [Strategy]).
 
@@ -127,30 +115,35 @@ next_step(Strategy) ->
     (
         linear,
         {max_total_timeout, non_neg_integer()},
-        Timeout::pos_integer()
+        Timeout :: pos_integer()
     ) -> non_neg_integer();
     (
         exponential,
         {max_total_timeout, non_neg_integer()},
-        {Factor::number(), Timeout::pos_integer(), MaxTimeout::timeout()}
+        {Factor :: number(), Timeout :: pos_integer(), MaxTimeout :: timeout()}
     ) -> non_neg_integer().
-
 compute_retries(linear, {max_total_timeout, MaxTotalTimeout}, Timeout) ->
-    trunc(MaxTotalTimeout/Timeout);
-
-compute_retries(exponential, {max_total_timeout, MaxTotalTimeout}, {Factor, Timeout, MaxTimeout}) when MaxTimeout =< Timeout; Factor =:= 1->
-    trunc(MaxTotalTimeout/min(Timeout, MaxTimeout));
-
+    trunc(MaxTotalTimeout / Timeout);
+compute_retries(exponential, {max_total_timeout, MaxTotalTimeout}, {Factor, Timeout, MaxTimeout}) when
+    MaxTimeout =< Timeout; Factor =:= 1
+->
+    trunc(MaxTotalTimeout / min(Timeout, MaxTimeout));
 compute_retries(exponential, {max_total_timeout, MaxTotalTimeout}, {Factor, Timeout, MaxTimeout}) ->
-    B1 = Timeout, %First element
-    Q = Factor, %Common ratio
-    M = case MaxTimeout of
-        infinity ->
-            infinity; % Bi can't be bigger than MaxTimeout
-        _ ->
-            trunc(math:log(MaxTimeout / B1) / math:log(Q) + 1) % A threshold after which Bi changes to MaxTimeout
-    end,
-    N = trunc(math:log( MaxTotalTimeout * (Q - 1) / B1 + 1 ) /  math:log(Q)), % A number of iteration we would need to achieve MaxTotalTimeout
+    %First element
+    B1 = Timeout,
+    %Common ratio
+    Q = Factor,
+    M =
+        case MaxTimeout of
+            infinity ->
+                % Bi can't be bigger than MaxTimeout
+                infinity;
+            _ ->
+                % A threshold after which Bi changes to MaxTimeout
+                trunc(math:log(MaxTimeout / B1) / math:log(Q) + 1)
+        end,
+    % A number of iteration we would need to achieve MaxTotalTimeout
+    N = trunc(math:log(MaxTotalTimeout * (Q - 1) / B1 + 1) / math:log(Q)),
     case N < M of
         true ->
             N;

@@ -27,7 +27,10 @@ take_test_() ->
         ?_assertEqual(
             {["oh", undefined, "what", "say oh", "back and..."], []},
             lists:foldl(
-                fun (K, {A, O1}) -> {V, O2} = genlib_opts:take(K, O1), {A ++ [V], O2} end,
+                fun(K, {A, O1}) ->
+                    {V, O2} = genlib_opts:take(K, O1),
+                    {A ++ [V], O2}
+                end,
                 {[], Opts},
                 [hey, honey, listen, i, come]
             )

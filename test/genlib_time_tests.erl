@@ -1,4 +1,5 @@
 -module(genlib_time_tests).
+
 -include_lib("eunit/include/eunit.hrl").
 
 -type testcase() :: {_, fun()}.
@@ -6,6 +7,7 @@
 -spec test() -> _.
 
 -spec consistent_tz_test() -> _.
+
 consistent_tz_test() ->
     Tz = genlib_time:get_timezone(),
     T0 = os:timestamp(),
@@ -20,7 +22,6 @@ get_timezone_for(Mcs, T0) ->
     end.
 
 -spec shift_date_test_() -> [testcase()].
-
 shift_date_test_() ->
     [
         ?_assertEqual(

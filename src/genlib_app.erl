@@ -4,7 +4,6 @@
 -module(genlib_app).
 
 -export([
-
     childspec/4,
     childspec/5,
     permanent/3,
@@ -28,15 +27,15 @@
     env/1,
     env/2,
     env/3
-
 ]).
 
 -define(DEFAULT_TIMEOUT, 5000).
 
--type role()    :: permanent | transient | temporary | supervisor.
--type name()    :: atom() | term().
--type entry()   :: atom(). %% e.g. 'start_link'
--type spec()    :: {name(), module(), entry()} | {name(), module()} | module().
+-type role() :: permanent | transient | temporary | supervisor.
+-type name() :: atom() | term().
+%% e.g. 'start_link'
+-type entry() :: atom().
+-type spec() :: {name(), module(), entry()} | {name(), module()} | module().
 -type regtype() :: none | local | global.
 
 -spec permanent(spec(), regtype(), genlib_opts:opts()) -> supervisor:child_spec().
@@ -52,23 +51,19 @@ temporary(Spec, RegType, Options) -> childspec(temporary, Spec, RegType, Options
 supervisor(Spec, RegType, Options) -> childspec(supervisor, Spec, RegType, Options).
 
 -spec childspec(role(), spec(), regtype(), genlib_opts:opts()) -> supervisor:child_spec().
-
 childspec(Role, Spec, RegType, Options) ->
     {Name, Entry, Deps} = entry(Spec, {RegType, Options}),
     {Name, Entry, restart_mode(Role), kill_mode(Role), role(Role), Deps}.
 
 -spec childspec(role(), spec(), regtype(), genlib_opts:opts(), timeout()) -> supervisor:child_spec().
-
 childspec(Role, Spec, RegType, Options, Timeout) ->
     {Name, Entry, Deps} = entry(Spec, {RegType, Options}),
     {Name, Entry, restart_mode(Role), Timeout, role(Role), Deps}.
 
 entry({Name, Module, Entry}, {RegType, Options}) ->
     {Name, {Module, Entry, arguments(RegType, Name, Options)}, [Module]};
-
 entry({Name, Module}, Options) ->
     entry({Name, Module, start_link}, Options);
-
 entry(Module, Options) ->
     entry({Module, Module, start_link}, Options).
 
@@ -91,36 +86,30 @@ wrap_args(Term) -> [Term].
 %% Private directories expansion
 
 -spec priv_dir() -> file:filename().
-
 priv_dir() ->
     {ok, AppName} = application:get_application(),
     priv_dir(AppName).
 
 -spec priv_dir(Application :: atom()) -> file:filename().
-
 priv_dir(AppName) ->
     case code:priv_dir(AppName) of
         Value when is_list(Value) ->
             Value ++ "/";
         _Error ->
             select_priv_dir([filename:join(["apps", atom_to_list(AppName), "priv"]), "priv"])
-     end.
+    end.
 
 -spec priv_path(Relative :: file:filename()) -> file:filename().
-
 priv_path(Relative) ->
     filename:join(priv_dir(), Relative).
 
 -spec priv_path(Application :: atom(), Relative :: file:filename()) -> file:filename().
-
 priv_path(AppName, Relative) ->
     filename:join(priv_dir(AppName), Relative).
 
 %%
 
--spec start_application(Application :: atom()) -> [Application] when
-    Application :: atom().
-
+-spec start_application(Application :: atom()) -> [Application] when Application :: atom().
 start_application(AppName) ->
     case application:start(AppName, permanent) of
         ok ->
@@ -133,62 +122,51 @@ start_application(AppName) ->
             exit(Reason)
     end.
 
--spec start_application_with(Application, genlib_opts:opts()) -> [Application] when
-    Application :: atom().
-
+-spec start_application_with(Application, genlib_opts:opts()) -> [Application] when Application :: atom().
 start_application_with(App, Env) ->
     _ = application:load(App),
     _ = set_app_env(App, Env),
     start_application(App).
 
--spec test_application_start(Application) -> [Application] when
-    Application :: atom().
-
+-spec test_application_start(Application) -> [Application] when Application :: atom().
 test_application_start(App) ->
     start_application(App).
 
 -spec test_application_stop([Application :: atom()]) -> ok.
-
 test_application_stop(Apps) ->
     _ = [application:stop(App) || App <- lists:reverse(Apps)],
     ok.
 
 -spec test_application_unload([Application :: atom()]) -> ok.
-
 test_application_unload(Apps) ->
     _ = [application:unload(App) || App <- lists:reverse(Apps)],
     ok.
 
 -spec stop_unload_applications([Application :: atom()]) -> ok.
-
 stop_unload_applications(Apps) ->
     _ = test_application_stop(Apps),
     test_application_unload(Apps).
 
 set_app_env(App, Env) ->
     R = [application:set_env(App, K, V) || {K, V} <- Env],
-    _ = lists:all(fun (E) -> E =:= ok end, R) orelse exit(setenv_failed),
+    _ = lists:all(fun(E) -> E =:= ok end, R) orelse exit(setenv_failed),
     ok.
 
 %%
 
 -spec env(Application :: atom()) -> genlib_opts:opts().
-
 env(App) ->
     application:get_all_env(App).
 
 -spec env(Application :: atom(), Key :: atom()) -> term() | undefined.
-
 env(App, Key) ->
     env(App, Key, undefined).
 
--spec env(Application :: atom(), Key :: atom(), Default) -> term() | Default when
-    Default :: any().
-
+-spec env(Application :: atom(), Key :: atom(), Default) -> term() | Default when Default :: any().
 env(App, Key, Default) ->
     case application:get_env(App, Key) of
         {ok, Value} -> Value;
-        undefined   -> Default
+        undefined -> Default
     end.
 
 %%
@@ -198,7 +176,7 @@ env(App, Key, Default) ->
 select_priv_dir(Paths) ->
     case lists:dropwhile(fun test_priv_dir/1, Paths) of
         [Path | _] -> Path;
-        _          -> exit(no_priv_dir)
+        _ -> exit(no_priv_dir)
     end.
 
 test_priv_dir(Path) ->

@@ -28,51 +28,42 @@
 %%
 
 -spec pad_string(binary(), pos_integer()) -> binary().
-
 pad_string(S, Length) ->
     pad_right(S, $\s, Length).
 
 -spec pad_numeric(integer() | binary(), pos_integer()) -> binary().
-
 pad_numeric(I, Length) when is_integer(I) andalso I >= 0 ->
     pad_numeric(integer_to_binary(I), Length);
-
 pad_numeric(S, Length) ->
     pad_left(S, $0, Length).
 
 -spec pad_right(binary(), 0..255, pos_integer()) -> binary().
-
 pad_right(S, C, Length) ->
     padr(S, C, Length - byte_size(S)).
 
 -spec pad_left(binary(), 0..255, pos_integer()) -> binary().
-
 pad_left(S, C, Length) ->
     padl(S, C, Length - byte_size(S), <<>>).
 
-padr(S, C, N) when N > 0      -> padr(<<S/binary, C>>, C, N - 1);
-padr(S, _, 0)                 -> S;
-padr(_, _, _)                 -> error(badarg).
+padr(S, C, N) when N > 0 -> padr(<<S/binary, C>>, C, N - 1);
+padr(S, _, 0) -> S;
+padr(_, _, _) -> error(badarg).
 
 padl(S, C, N, Buf) when N > 0 -> padl(S, C, N - 1, <<Buf/binary, C>>);
-padl(S, _, 0, Buf)            -> <<Buf/binary, S/binary>>;
-padl(_, _, _, _)              -> error(badarg).
+padl(S, _, 0, Buf) -> <<Buf/binary, S/binary>>;
+padl(_, _, _, _) -> error(badarg).
 
 -spec trim(binary()) -> binary().
-
 trim(S) ->
     trim_left(trim_right(S)).
 
 -spec trim_left(binary()) -> binary().
-
 trim_left(<<C, S/binary>>) when C =:= $\s orelse C =:= $\t ->
     trim_left(S);
-
 trim_left(S) ->
     S.
 
 -spec trim_right(binary()) -> binary().
-
 trim_right(S) ->
     trim_right(S, byte_size(S) - 1).
 
@@ -85,61 +76,48 @@ trim_right(S, N) ->
     end.
 
 -spec cat(iodata(), iodata()) -> binary().
-
 cat(S1, S2) when is_binary(S1), is_binary(S2) ->
     <<S1/binary, S2/binary>>;
-
 cat(S1, S2) ->
     cat(iolist_to_binary(S1), iolist_to_binary(S2)).
 
 -spec cat([iodata(), ...]) -> binary().
-
 cat(Ss = [_ | _]) ->
     iolist_to_binary(Ss);
-
 cat(Badarg) ->
     error(badarg, [Badarg]).
 
 -spec join([iodata(), ...]) -> binary().
-
 join(List) ->
     join($\s, List).
 
 -spec join(char() | iodata(), [iodata(), ...]) -> binary().
-
 join(Delim, List) ->
     iolist_to_binary(join_(Delim, List)).
 
 join_(_, [H]) ->
     [H];
-
 join_(Delim, [H | T]) ->
     [H, Delim | join_(Delim, T)].
 
 -spec to_lower(binary()) -> binary().
-
 to_lower(S) ->
     to_case(lower, S, <<>>).
 
 -spec to_upper(binary()) -> binary().
-
 to_upper(S) ->
     to_case(upper, S, <<>>).
 
 to_case(_Case, <<>>, Acc) ->
     Acc;
-
 to_case(_Case, <<C, _/binary>>, _Acc) when C > 127 ->
     error(badarg);
-
 to_case(Case = lower, <<C, Rest/binary>>, Acc) ->
     to_case(Case, Rest, <<Acc/binary, (to_lower_char(C))>>);
-
 to_case(Case = upper, <<C, Rest/binary>>, Acc) ->
     to_case(Case, Rest, <<Acc/binary, (to_upper_char(C))>>).
 
 -spec to_snakecase(binary()) -> binary().
-
 to_snakecase(S) ->
     snake_case(l, S, <<>>).
 
@@ -148,16 +126,12 @@ to_snakecase(S) ->
 
 snake_case(l, <<L, U, Rest/binary>>, A) when ?is_lower(L), ?is_upper(U) ->
     snake_case(u, Rest, <<A/binary, L, $_, (to_lower_char(U))>>);
-
 snake_case(u, <<U, L, Rest/binary>>, A) when ?is_upper(U), ?is_lower(L) ->
     snake_case(l, Rest, <<A/binary, $_, (to_lower_char(U)), L>>);
-
 snake_case(M, <<C, Rest/binary>>, A) when C < 128 ->
     snake_case(M, Rest, <<A/binary, (to_lower_char(C))>>);
-
 snake_case(_, <<>>, A) ->
     A;
-
 snake_case(_, _, _) ->
     error(badarg).
 
@@ -180,7 +154,6 @@ to_upper_char(C) ->
     C.
 
 -spec is_equal_icase(binary(), binary()) -> boolean().
-
 is_equal_icase(S1, S2) ->
     to_lower(S1) =:= to_lower(S2).
 

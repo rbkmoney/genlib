@@ -19,11 +19,11 @@ hex_test_() ->
 -spec format_int_base_test_() -> [testcase()].
 format_int_base_test_() ->
     [
-        ?_assertError(    badarg, genlib_format:format_int_base( 12345, 99)),
-        ?_assertError(    badarg, genlib_format:format_int_base(-12345, 63)),
-        ?_assertError(    badarg, genlib_format:format_int_base(     5,  1)),
-        ?_assertEqual(   <<"0">>, genlib_format:format_int_base(     0, 42)),
-        ?_assertEqual( <<"HW5">>, genlib_format:format_int_base( 31337, 42)),
+        ?_assertError(badarg, genlib_format:format_int_base(12345, 99)),
+        ?_assertError(badarg, genlib_format:format_int_base(-12345, 63)),
+        ?_assertError(badarg, genlib_format:format_int_base(5, 1)),
+        ?_assertEqual(<<"0">>, genlib_format:format_int_base(0, 42)),
+        ?_assertEqual(<<"HW5">>, genlib_format:format_int_base(31337, 42)),
         ?_assertEqual(<<"-HW5">>, genlib_format:format_int_base(-31337, 42))
     ].
 
@@ -39,51 +39,73 @@ stacktrace_test_() ->
     [
         ?_assertMatch(
             <<
-                "in proplists:get_value(dink,drance,[]) at line ", _:3/binary, $\n,
-                $\t, "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary, $\n,
+                "in proplists:get_value(dink,drance,[]) at line ",
+                _:3/binary,
+                $\n,
+                $\t,
+                "in genlib_format_tests:-stacktrace_test_/0",
+                _:7/binary,
+                "/0 at line ",
+                _:2/binary,
+                $\n,
                 _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
                     proplists:get_value(dink, drance, [])
-                catch _:_:Stacktrace ->
-                    Stacktrace
+                catch
+                    _:_:Stacktrace ->
+                        Stacktrace
                 end,
                 [newlines]
             )
         ),
         ?_assertMatch(
             <<
-                "in ordsets:add_element(1,{4,8,15,16,23,...}) at line ", _:3/binary, ", "
-                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary,
+                "in ordsets:add_element(1,{4,8,15,16,23,...}) at line ",
+                _:3/binary,
+                ", "
+                "in genlib_format_tests:-stacktrace_test_/0",
+                _:7/binary,
+                "/0 at line ",
+                _:2/binary,
                 _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
                     ordsets:add_element(
                         1,
-                        {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}
+                        {4, 8, 15, 16, 23, 42, 4, 8, 15, 16, 23, 42, 4, 8, 15, 16, 23, 42, 4, 8, 15, 16, 23, 42, 4, 8,
+                            15, 16, 23, 42, 4, 8, 15, 16, 23, 42}
                     )
-                catch _:_:Stacktrace ->
-                    Stacktrace
+                catch
+                    _:_:Stacktrace ->
+                        Stacktrace
                 end,
                 [{arglist_limit, 20}]
             )
         ),
         ?_assertMatch(
             <<
-                "in ordsets:add_element(1,{4,8,...}) at line ", _:3/binary, ", "
-                "in genlib_format_tests:-stacktrace_test_/0", _:7/binary, "/0 at line ", _:2/binary,
+                "in ordsets:add_element(1,{4,8,...}) at line ",
+                _:3/binary,
+                ", "
+                "in genlib_format_tests:-stacktrace_test_/0",
+                _:7/binary,
+                "/0 at line ",
+                _:2/binary,
                 _/binary
             >>,
             genlib_format:format_stacktrace(
                 try
                     ordsets:add_element(
                         1,
-                        {4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42,4,8,15,16,23,42}
+                        {4, 8, 15, 16, 23, 42, 4, 8, 15, 16, 23, 42, 4, 8, 15, 16, 23, 42, 4, 8, 15, 16, 23, 42, 4, 8,
+                            15, 16, 23, 42, 4, 8, 15, 16, 23, 42}
                     )
-                catch _:_:Stacktrace ->
-                    Stacktrace
+                catch
+                    _:_:Stacktrace ->
+                        Stacktrace
                 end,
                 [{arglist_depth, 5}]
             )
@@ -104,20 +126,16 @@ decimal_test_() ->
 uuid_to_bstring_test_() ->
     [
         ?_assertEqual(
-           <<"952af85f-06e1-4986-b55e-bbe3951a2f4a">>,
-           genlib_format:uuid_to_bstring(<<149, 42, 248, 95,
-                                           6, 225,
-                                           73, 134,
-                                           181, 94,
-                                           187, 227, 149, 26, 47, 74>>)
-          )
+            <<"952af85f-06e1-4986-b55e-bbe3951a2f4a">>,
+            genlib_format:uuid_to_bstring(<<149, 42, 248, 95, 6, 225, 73, 134, 181, 94, 187, 227, 149, 26, 47, 74>>)
+        )
     ].
 
 -spec parse_timespan_test_() -> [testcase()].
 parse_timespan_test_() ->
     [
-        ?_assertEqual(15 * 1000,                              genlib_format:parse_timespan(<<"15s">>)),
-        ?_assertEqual(15 * 60 * 1000,                         genlib_format:parse_timespan(<<"15m">>)),
-        ?_assertEqual(erlang:round(1.5 * 60 * 1000),          genlib_format:parse_timespan(<<"1.5m">>)),
+        ?_assertEqual(15 * 1000, genlib_format:parse_timespan(<<"15s">>)),
+        ?_assertEqual(15 * 60 * 1000, genlib_format:parse_timespan(<<"15m">>)),
+        ?_assertEqual(erlang:round(1.5 * 60 * 1000), genlib_format:parse_timespan(<<"1.5m">>)),
         ?_assertError({badarg, {invalid_time_unit, <<"h">>}}, genlib_format:parse_timespan(<<"15h">>))
     ].

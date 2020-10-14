@@ -34,6 +34,7 @@
 %%
 
 -opaque t() :: {integer(), pos_integer()}.
+
 -type rounding_method() :: round_half_towards_zero | round_half_away_from_zero.
 
 -export_type([t/0]).
@@ -60,12 +61,10 @@
 %%
 
 -spec new(integer()) -> t().
-
 new(I) ->
     {I, 1}.
 
 -spec new(integer(), neg_integer() | pos_integer()) -> t().
-
 new(P, Q) when Q > 0 ->
     {P, Q};
 new(P, Q) when Q < 0 ->
@@ -74,33 +73,36 @@ new(_, 0) ->
     erlang:error(badarg).
 
 -spec num(t()) -> integer().
-
 num({P, _}) ->
     P.
 
 -spec denom(t()) -> neg_integer() | pos_integer().
-
 denom({_, Q}) ->
     Q.
 
 -spec round(t()) -> integer().
-
 round(V) ->
     round(V, round_half_away_from_zero).
 
 -spec round(t(), rounding_method()) -> integer().
-
 round({0, _}, _) ->
     0;
 round({P, Q}, round_half_towards_zero) when P > 0 ->
-    P div Q + case 2 * (P rem Q) > Q of true -> 1; false -> 0 end;
+    P div Q +
+        case 2 * (P rem Q) > Q of
+            true -> 1;
+            false -> 0
+        end;
 round({P, Q}, round_half_away_from_zero) when P > 0 ->
-    P div Q + case 2 * (P rem Q) < Q of true -> 0; false -> 1 end;
+    P div Q +
+        case 2 * (P rem Q) < Q of
+            true -> 0;
+            false -> 1
+        end;
 round({P, Q}, Method) ->
     -round({-P, Q}, Method).
 
 -spec cmp(t(), t()) -> eq | gt | lt.
-
 cmp(R1, R2) ->
     case num(sub(R1, R2)) of
         P when P > 0 -> gt;
@@ -109,31 +111,25 @@ cmp(R1, R2) ->
     end.
 
 -spec neg(t()) -> t().
-
 neg({P, Q}) ->
     new(-P, Q).
 
 -spec add(t(), t()) -> t().
-
 add({P1, Q1}, {P2, Q2}) ->
     {P1 * Q2 + P2 * Q1, Q1 * Q2}.
 
 -spec sub(t(), t()) -> t().
-
 sub(R1, R2) ->
     add(R1, neg(R2)).
 
 -spec inv(t()) -> t().
-
 inv({P, Q}) ->
     new(Q, P).
 
 -spec mul(t(), t()) -> t().
-
 mul({P1, Q1}, {P2, Q2}) ->
     {P1 * P2, Q1 * Q2}.
 
 -spec dvd(t(), t()) -> t().
-
 dvd(R1, R2) ->
     mul(R1, inv(R2)).

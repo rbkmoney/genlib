@@ -45,7 +45,6 @@ utc_test_() ->
     ].
 
 -spec parse_test_() -> [testcase()].
-
 parse_test_() ->
     [
         ?_assertEqual(
@@ -67,7 +66,6 @@ parse_test_() ->
     ].
 
 -spec format_test_() -> [testcase()].
-
 format_test_() ->
     [
         ?_assertEqual(
@@ -89,7 +87,6 @@ format_test_() ->
     ].
 
 -spec format_relaxed_test_() -> [testcase()].
-
 format_relaxed_test_() ->
     [
         ?_assertEqual(

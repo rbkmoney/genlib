@@ -31,20 +31,20 @@ pad_right_test_() ->
 -spec snakecase_test_() -> [testcase()].
 snakecase_test_() ->
     [
-        ?_assertEqual(<<"payer_mobile_commerce">> , genlib_string:to_snakecase(<<"PayerMobileCommerce">>)),
-        ?_assertEqual(<<"payer_bank_card">>       , genlib_string:to_snakecase(<<"PayerBankCard">>)),
-        ?_assertEqual(<<"payer_cpa">>             , genlib_string:to_snakecase(<<"PayerCPA">>)),
-        ?_assertEqual(<<"payer_e_wallet">>        , genlib_string:to_snakecase(<<"PayerEWallet">>)),
-        ?_assertEqual(<<"payer_cash">>            , genlib_string:to_snakecase(<<"PayerCash">>))
+        ?_assertEqual(<<"payer_mobile_commerce">>, genlib_string:to_snakecase(<<"PayerMobileCommerce">>)),
+        ?_assertEqual(<<"payer_bank_card">>, genlib_string:to_snakecase(<<"PayerBankCard">>)),
+        ?_assertEqual(<<"payer_cpa">>, genlib_string:to_snakecase(<<"PayerCPA">>)),
+        ?_assertEqual(<<"payer_e_wallet">>, genlib_string:to_snakecase(<<"PayerEWallet">>)),
+        ?_assertEqual(<<"payer_cash">>, genlib_string:to_snakecase(<<"PayerCash">>))
     ].
 
 -spec join_test_() -> [testcase()].
 join_test_() ->
     [
-        ?_assertEqual(<<"foo!bar!z">>             , genlib_string:join($!, ["foo", <<"bar">>, $z])),
-        ?_assertEqual(<<"foo bar z">>             , genlib_string:join(["foo", <<"bar">>, $z])),
-        ?_assertEqual(<<"a:=:b:=:c:=:d:=:e:=:f">> , genlib_string:join(<<":=:">>, lists:seq($a, $f))),
-        ?_assertError(_                           , genlib_string:join($:, []))
+        ?_assertEqual(<<"foo!bar!z">>, genlib_string:join($!, ["foo", <<"bar">>, $z])),
+        ?_assertEqual(<<"foo bar z">>, genlib_string:join(["foo", <<"bar">>, $z])),
+        ?_assertEqual(<<"a:=:b:=:c:=:d:=:e:=:f">>, genlib_string:join(<<":=:">>, lists:seq($a, $f))),
+        ?_assertError(_, genlib_string:join($:, []))
     ].
 
 -spec redact_test_() -> [testcase()].
