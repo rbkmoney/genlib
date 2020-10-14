@@ -21,7 +21,7 @@ linear_test() ->
 -spec exponential_test() -> _.
 exponential_test() ->
     R1 = genlib_retry:exponential(3, 2, 64),
-    {wait, 64 , R2} = genlib_retry:next_step(R1),
+    {wait, 64, R2} = genlib_retry:next_step(R1),
     {wait, 128, R3} = genlib_retry:next_step(R2),
     {wait, 256, R4} = genlib_retry:next_step(R3),
     finish = genlib_retry:next_step(R4).
@@ -30,17 +30,23 @@ exponential_test() ->
 timecap_test() ->
     R1 = genlib_retry:timecap(1500, genlib_retry:exponential(infinity, 2, 50, 500)),
     ok = timer:sleep(10),
-    {wait, N1, R2} = genlib_retry:next_step(R1), % ~  40 /  40
+    % ~  40 /  40
+    {wait, N1, R2} = genlib_retry:next_step(R1),
     ok = timer:sleep(N1 + 20),
-    {wait, N2, R3} = genlib_retry:next_step(R2), % ~  80 / 120
+    % ~  80 / 120
+    {wait, N2, R3} = genlib_retry:next_step(R2),
     ok = timer:sleep(N2 + 30),
-    {wait, N3, R4} = genlib_retry:next_step(R3), % ~ 170 / 290
+    % ~ 170 / 290
+    {wait, N3, R4} = genlib_retry:next_step(R3),
     ok = timer:sleep(N3 + 40),
-    {wait, N4, R5} = genlib_retry:next_step(R4), % ~ 360 / 650
+    % ~ 360 / 650
+    {wait, N4, R5} = genlib_retry:next_step(R4),
     ok = timer:sleep(N4 + 50),
-    {wait, N5, R6} = genlib_retry:next_step(R5), % ~ 450 / 1100
+    % ~ 450 / 1100
+    {wait, N5, R6} = genlib_retry:next_step(R5),
     ok = timer:sleep(N5 + 60),
-    finish = genlib_retry:next_step(R6),         % ~ 440 / 1540
+    % ~ 440 / 1540
+    finish = genlib_retry:next_step(R6),
     ?assertNear(40, N1, 10),
     ?assertNear(80, N2, 10),
     ?assertNear(170, N3, 10),
@@ -65,7 +71,7 @@ linear_compute_retries_test() ->
 -spec exponential_compute_retries_test() -> _.
 exponential_compute_retries_test() ->
     Fixture = [
-        {{max_total_timeout, 130}, 2, 10,  1300},
+        {{max_total_timeout, 130}, 2, 10, 1300},
         {{max_total_timeout, 130}, 21, 11, 1300},
         {{max_total_timeout, 200}, 1, 10, 27000},
         {{max_total_timeout, 2000}, 1.2, 100, 1000}
@@ -81,7 +87,6 @@ assert_max_retry(Retry = {linear, _Retries, Timeout}, MaxTotalTimeout) ->
     {_, SumTimeout} = process_retry(Retry),
     ?assertMatch(true, SumTimeout =< MaxTotalTimeout),
     ?assertMatch(true, SumTimeout + Timeout >= MaxTotalTimeout);
-
 assert_max_retry(Retry = {exponential, _Retries, _Factor, _Timeout, _MaxTimeout}, MaxTotalTimeout) ->
     {{exponential, _, _, NextTimeout, _}, SumTimeout} = process_retry(Retry),
     ?assertMatch(true, SumTimeout =< MaxTotalTimeout),

@@ -23,7 +23,7 @@ truemap_test_() ->
     Map = #{hey => "oh", listen => "what", i => "say oh", come => "back and..."},
     InvMap = #{"oh" => hey, "what" => listen, "say oh" => i, "back and..." => come},
     [
-        ?_assertEqual(InvMap, genlib_map:truemap(fun (K, V) -> {V, K} end, Map))
+        ?_assertEqual(InvMap, genlib_map:truemap(fun(K, V) -> {V, K} end, Map))
     ].
 
 -spec deepput_test_() -> [testcase()].
@@ -46,5 +46,5 @@ diff_test_() ->
         ?_assertEqual(#{poo => hoo}, genlib_map:diff(Map#{poo => hoo}, Map)),
         ?_assertEqual(#{hey => hoo}, genlib_map:diff(Map#{hey => hoo}, Map)),
         ?_assertEqual(#{this_is => 'undefined'}, genlib_map:diff(#{this_is => 'undefined'}, #{this_is => 'not'})),
-        ?_assertEqual(#{this_is => 'not'      }, genlib_map:diff(#{this_is => 'not'}, #{this_is => 'undefined'}))
+        ?_assertEqual(#{this_is => 'not'}, genlib_map:diff(#{this_is => 'not'}, #{this_is => 'undefined'}))
     ].

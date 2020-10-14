@@ -8,12 +8,9 @@
     depth := non_neg_integer()
 }.
 
--type editor() :: fun(
-    (term(), annos()) -> proceed | {replace, term()}
-).
+-type editor() :: fun((term(), annos()) -> proceed | {replace, term()}).
 
 -spec run(editor(), term()) -> term().
-
 run(F, T) ->
     run(F, T, #{depth => 0}).
 
@@ -25,7 +22,7 @@ run(F, T, As) ->
             if
                 is_map(T) ->
                     As1 = submerge(As),
-                    genlib_map:truemap(fun (K, Tk) -> {run(F, K, As1), run(F, Tk, As1)} end, T);
+                    genlib_map:truemap(fun(K, Tk) -> {run(F, K, As1), run(F, Tk, As1)} end, T);
                 is_list(T) ->
                     As1 = submerge(As),
                     [run(F, Te, As1) || Te <- T];

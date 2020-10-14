@@ -15,6 +15,9 @@ build:
         name: run dialyzer
         code: make dialyze
       - script:
+        name: run erlfmt
+        code: make check_format
+      - script:
         name: run test suite
         code: make test
     after-steps:

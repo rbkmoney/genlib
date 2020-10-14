@@ -2,6 +2,7 @@
 % genlib_wildcard tests
 
 -module(genlib_wildcard_tests).
+
 -include_lib("eunit/include/eunit.hrl").
 
 -spec test() -> _.
@@ -10,7 +11,8 @@
 
 -spec match_test_() -> [testcase()].
 match_test_() ->
-    lists:map(fun({{Pattern, Text}, Result}) ->
+    lists:map(
+        fun({{Pattern, Text}, Result}) ->
             ?_assertEqual(Result, genlib_wildcard:match(Pattern, Text))
         end,
         [

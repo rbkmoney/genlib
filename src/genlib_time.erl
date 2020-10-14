@@ -38,7 +38,8 @@
 
 -type ts() :: pos_integer().
 -type tzoffset() :: {'-' | '+', 0..12, 0..59}.
--type timespan() :: pos_integer(). % ms
+% ms
+-type timespan() :: pos_integer().
 
 -export_type([ts/0]).
 -export_type([tzoffset/0]).
@@ -47,74 +48,60 @@
 %%
 
 -spec to_unixtime(pos_integer()) -> ts().
-
 to_unixtime(Time) when is_integer(Time) ->
     Time - ?EPOCH_DIFF.
 
 -spec to_gregorian(ts()) -> pos_integer().
-
 to_gregorian(Time) when is_integer(Time) ->
     Time + ?EPOCH_DIFF.
 
 -spec daytime_to_unixtime(calendar:datetime()) -> ts().
-
 daytime_to_unixtime(Daytime) ->
     to_unixtime(calendar:datetime_to_gregorian_seconds(Daytime)).
 
 -spec unixtime_to_daytime(ts()) -> calendar:datetime().
-
 unixtime_to_daytime(Unixtime) ->
     calendar:gregorian_seconds_to_datetime(to_gregorian(Unixtime)).
 
 -spec local_time() -> ts().
-
 local_time() ->
     to_unixtime(calendar:datetime_to_gregorian_seconds(calendar:local_time())).
 
 -spec universal_time() -> ts().
-
 universal_time() ->
     to_unixtime(calendar:datetime_to_gregorian_seconds(calendar:universal_time())).
 
 -spec now() -> ts().
-
 now() ->
     local_time().
 
 -spec unow() -> ts().
-
 unow() ->
     universal_time().
 
 -spec ticks() -> pos_integer().
-
 ticks() ->
     {Ms, S, Mcs} = os:timestamp(),
     (Ms * 1000000 + S) * 1000000 + Mcs.
 
 %%
 
--spec sanitize_date(ImproperDate) -> calendar:date() when
-    ImproperDate :: calendar:date() | {0, 1..12, 1..31}.
-
+-spec sanitize_date(ImproperDate) -> calendar:date() when ImproperDate :: calendar:date() | {0, 1..12, 1..31}.
 sanitize_date({0, M, D}) ->
     {Today = {Y, _, _}, _} = calendar:local_time(),
     Candidates = [{Y + N, M, D} || N <- [-1, 0, 1]],
-    [Date | _] = lists:sort(fun (D1, D2) -> abs(days_between(Today, D1)) < abs(days_between(Today, D2)) end, Candidates),
+    [Date | _] = lists:sort(fun(D1, D2) -> abs(days_between(Today, D1)) < abs(days_between(Today, D2)) end, Candidates),
     Date;
-
 sanitize_date(Date) ->
     Date.
 
 -spec days_between(calendar:date(), calendar:date()) -> integer().
-
 days_between(D1, D2) ->
     calendar:date_to_gregorian_days(D2) - calendar:date_to_gregorian_days(D1).
 
 -type date_interval() :: {integer(), integer(), integer()}.
 
 -spec shift_date(calendar:date(), integer() | date_interval()) -> calendar:date().
-
 shift_date({Y, M, D}, {Ys, Ms, Ds}) ->
     Date1 = normalize_month_days(normalize_year({Y + Ys, M + Ms, D})),
     shift_date(Date1, Ds);
@@ -168,10 +155,13 @@ duration_to_seconds({D, H, M, S}) -> duration_to_seconds({D * 24 + H, M, S}).
 %%
 
 -spec get_timezone() -> tzoffset().
-
 get_timezone() ->
     UNow = calendar:universal_time(),
     Now = calendar:universal_time_to_local_time(UNow),
     MinuteDiff = (daytime_to_unixtime(Now) - daytime_to_unixtime(UNow)) div 60,
-    Sign = if MinuteDiff < 0 -> '-'; true -> '+' end,
+    Sign =
+        if
+            MinuteDiff < 0 -> '-';
+            true -> '+'
+        end,
     {Sign, abs(MinuteDiff) div 60, abs(MinuteDiff) rem 60}.

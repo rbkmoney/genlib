@@ -8,17 +8,15 @@
 -type result(T) :: {ok, T} | {error, _} | timeout.
 -type opts() :: #{
     % Soft limit for duration of _whole operation_, not of a single functor call.
-    timeout    => timeout(),
+    timeout => timeout(),
     % Hard limit for a number of processes to spin.
     proc_limit => pos_integer()
 }.
 
 -define(DEFAULT_SAFEMAP_TIMEOUT, 5000).
 
--spec map(fun((A) -> B), [A]) ->
-    [B].
--spec map(fun((A) -> B), [A], opts()) ->
-    [B] | no_return().
+-spec map(fun((A) -> B), [A]) -> [B].
+-spec map(fun((A) -> B), [A], opts()) -> [B] | no_return().
 
 map(F, L) ->
     map(F, L, #{}).
@@ -27,10 +25,8 @@ map(F, L, Opts0) ->
     Opts = maps:merge(#{timeout => infinity}, Opts0),
     lists:map(fun replicate/1, safemap(F, L, Opts)).
 
--spec safemap(fun((A) -> B), [A]) ->
-    [result(B)].
--spec safemap(fun((A) -> B), [A], opts()) ->
-    [result(B)].
+-spec safemap(fun((A) -> B), [A]) -> [result(B)].
+-spec safemap(fun((A) -> B), [A], opts()) -> [result(B)].
 
 safemap(F, L) ->
     safemap(F, L, #{}).
@@ -42,25 +38,26 @@ safemap(F, L, Opts) ->
     % Later on we link each worker process with this fuse process so that no worker would outlive
     % neither specified timeout nor current process.
     Fuse = spawn_fuse(Opts),
-    Results = case maps:get(proc_limit, Opts, undefined) of
-        undefined ->
-            % Number of workers is unbounded.
-            % Spawn one worker per each unit of work.
-            collect(fun collect_one/3, lists:map(executor_one(F, Fuse), L));
-        Limit ->
-            Size = erlang:length(L),
-            if
-                Limit >= Size ->
-                    % Number of workers is bounded yet greater than the size of workload.
-                    % Again, spawn one worker per each unit of work.
-                    collect(fun collect_one/3, lists:map(executor_one(F, Fuse), L));
-                Limit < Size ->
-                    % Number of workers is bounded.
-                    % Distribute workload between this number of workers so that each
-                    % would get their fair share right at the start.
-                    collect(fun collect_many/3, distribute(F, Fuse, L, Size, Limit, 0))
-            end
-    end,
+    Results =
+        case maps:get(proc_limit, Opts, undefined) of
+            undefined ->
+                % Number of workers is unbounded.
+                % Spawn one worker per each unit of work.
+                collect(fun collect_one/3, lists:map(executor_one(F, Fuse), L));
+            Limit ->
+                Size = erlang:length(L),
+                if
+                    Limit >= Size ->
+                        % Number of workers is bounded yet greater than the size of workload.
+                        % Again, spawn one worker per each unit of work.
+                        collect(fun collect_one/3, lists:map(executor_one(F, Fuse), L));
+                    Limit < Size ->
+                        % Number of workers is bounded.
+                        % Distribute workload between this number of workers so that each
+                        % would get their fair share right at the start.
+                        collect(fun collect_many/3, distribute(F, Fuse, L, Size, Limit, 0))
+                end
+        end,
     _ = erlang:exit(Fuse, normal),
     Results.
 
@@ -69,10 +66,9 @@ spawn_fuse(Opts) ->
     Timeout = maps:get(timeout, Opts, ?DEFAULT_SAFEMAP_TIMEOUT),
     erlang:spawn(fuse(Pid, Timeout)).
 
--spec fuse(pid(), timeout()) ->
-    fun(() -> no_return()).
+-spec fuse(pid(), timeout()) -> fun(() -> no_return()).
 fuse(Pid, Timeout) ->
-    fun () ->
+    fun() ->
         % NOTE
         % We need to trap exits here to be unaffected by worker processes terminating upon
         % completion. This in turn makes the process message queue grow in size because for
@@ -105,14 +101,14 @@ compute_nth_slice(N, Size, Limit) ->
     (Size * (N + 1) div Limit) - (Size * N div Limit).
 
 executor_one(F, Fuse) ->
-    fun (E) ->
+    fun(E) ->
         spawn_executor(fun execute_one/2, F, Fuse, E, 1)
     end.
 
 spawn_executor(Executor, F, Fuse, E, Extra) ->
     Pid = erlang:self(),
     Ref = erlang:make_ref(),
-    WorkerPidRef = erlang:spawn_monitor(fun () ->
+    WorkerPidRef = erlang:spawn_monitor(fun() ->
         % NOTE
         % If the fuse process is already dead at the time of linking (when the
         % timeout value was very small for example) worker will die right away
@@ -125,18 +121,17 @@ spawn_executor(Executor, F, Fuse, E, Extra) ->
     {{WorkerPidRef, Ref}, Extra}.
 
 -spec execute_one(fun((A) -> B), A) -> result(B).
-
 execute_one(F, E) ->
     try
         {ok, F(E)}
-    catch C:R:Stacktrace ->
-        {error, {C, R, Stacktrace}}
+    catch
+        C:R:Stacktrace ->
+            {error, {C, R, Stacktrace}}
     end.
 
 -spec execute_many(fun((A) -> B), [A]) -> {many, [result(B)]}.
-
 execute_many(F, L) ->
-    {many, lists:foldl(fun (E, Acc) -> [execute_one(F, E) | Acc] end, [], L)}.
+    {many, lists:foldl(fun(E, Acc) -> [execute_one(F, E) | Acc] end, [], L)}.
 
 collect(Collector, Workers) ->
     Results = await(Collector, Workers, []),
@@ -148,14 +143,15 @@ await(Collector, [{{{WorkerPid, MRef}, Ref}, Extra} | WorkersLeft], Results) ->
             _ = erlang:demonitor(MRef, [flush]),
             await(Collector, WorkersLeft, Collector(Result, Extra, Results));
         {'DOWN', MRef, process, WorkerPid, Reason} ->
-            Result = case Reason of
-                % NOTE
-                % Getting `noproc` here means that the fuse process was already dead at the time of
-                % linking. We interpret it as a timeout condition  which appears to be the only
-                % valid interpretation here.
-                {noproc, _} -> timeout;
-                _           -> Reason
-            end,
+            Result =
+                case Reason of
+                    % NOTE
+                    % Getting `noproc` here means that the fuse process was already dead at the time of
+                    % linking. We interpret it as a timeout condition  which appears to be the only
+                    % valid interpretation here.
+                    {noproc, _} -> timeout;
+                    _ -> Reason
+                end,
             await(Collector, WorkersLeft, Collector(Result, Extra, Results))
     end;
 await(_Collector, [], Results) ->

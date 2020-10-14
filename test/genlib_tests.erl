@@ -29,7 +29,7 @@ dice_roll_test() ->
     [{_, W1}, {_, W2} | _] = Data,
     [{_, N1}, {_, N2} | _] = Choices,
     ?assert(abs(W1 / W2 - N1 / N2) < 1),
-    WSum = lists:foldl(fun ({_, W}, Acc) -> Acc + W end, 0, Data),
+    WSum = lists:foldl(fun({_, W}, Acc) -> Acc + W end, 0, Data),
     ?assert(abs(Average - S / WSum) < 1).
 
 -spec print_test_() -> [testcase()].
@@ -37,7 +37,7 @@ print_test_() ->
     [
         ?_assertMatch(<<"My hat">>, genlib:print(<<"My hate is for you, bastard!">>, 6)),
         ?_assert(byte_size(genlib:print(<<"qwertysferferferfecefefegergeferfwdwfwfegwfgegr">>, 4)) =< 4),
-        ?_assert(byte_size(genlib:print({test, test, [lol, dance, "madness", <<"hehe">>]}, 2)) =< 2 ),
+        ?_assert(byte_size(genlib:print({test, test, [lol, dance, "madness", <<"hehe">>]}, 2)) =< 2),
         ?_assert(byte_size(genlib:print(<<"ДВЕРЬ МНЕ ЗаПиЛи"/utf8>>, 21)) =< 21)
     ].
 
@@ -57,6 +57,7 @@ format_test_() ->
             genlib:format("~ts", ["H̸̡̪̯ͨ͊̽̅̾̎Ȩ̬̩̾͛ͪ̈́̀́͘ ̶̧̨̱̹̭̯ͧ̾ͬC̷̙̲̝͖ͭ̏ͥͮ͟Oͮ͏̮̪̝͍M̲̖͊̒ͪͩͬ̚̚͜Ȇ̴̟̟͙̞ͩ͌͝S̨̥̫͎̭ͯ̿̔̀ͅ"])
         )
     ].
+
 %%
 
 random_in(A, B) ->
@@ -64,14 +65,17 @@ random_in(A, B) ->
 
 group_choices(Cs) ->
     lists:foldl(
-        fun (C, Acc) -> orddict:update(C, fun (N) -> N + 1 end, 1, Acc) end,
+        fun(C, Acc) -> orddict:update(C, fun(N) -> N + 1 end, 1, Acc) end,
         orddict:new(),
         Cs
     ).
 
 compute_ratios(Data, Choices) ->
     lists:map(
-        fun ({What, N}) -> {What, W} = lists:keyfind(What, 1, Data), N / W end,
+        fun({What, N}) ->
+            {What, W} = lists:keyfind(What, 1, Data),
+            N / W
+        end,
         Choices
     ).
 
@@ -80,7 +84,10 @@ compute_average(Series) ->
 
 compute_stddev(Series, Average) ->
     Sums = lists:foldl(
-        fun(V, Acc) -> D = V - Average, Acc + (D * D) end,
+        fun(V, Acc) ->
+            D = V - Average,
+            Acc + (D * D)
+        end,
         0,
         Series
     ),

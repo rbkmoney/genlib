@@ -24,17 +24,18 @@
     parse/2
 ]).
 
--type datetime()  :: binary().
--type time_unit() :: microsecond % unfortunately not exported from calendar module
-                   | millisecond
-                   | nanosecond
-                   | second.
+-type datetime() :: binary().
+% unfortunately not exported from calendar module
+-type time_unit() ::
+    microsecond
+    | millisecond
+    | nanosecond
+    | second.
 
 -export_type([datetime/0]).
 -export_type([time_unit/0]).
 
 -spec is_utc(datetime()) -> boolean().
-
 is_utc(Rfc3339) when is_binary(Rfc3339) ->
     Size0 = erlang:byte_size(Rfc3339),
     Size1 = Size0 - 1,
@@ -51,19 +52,16 @@ is_utc(Rfc3339) when is_binary(Rfc3339) ->
     end.
 
 -spec format_relaxed(integer(), time_unit()) -> datetime().
-
 format_relaxed(Value, Unit) when is_integer(Value) andalso is_atom(Unit) ->
     {AdjTime, AdjUnit} = adjust_time_unit(Value, Unit),
     format(AdjTime, AdjUnit).
 
 -spec format(integer(), time_unit()) -> datetime().
-
 format(Value, Unit) when is_integer(Value) andalso is_atom(Unit) ->
     Str = calendar:system_time_to_rfc3339(Value, [{unit, Unit}, {offset, "Z"}]),
     erlang:list_to_binary(Str).
 
 -spec parse(datetime(), time_unit()) -> integer().
-
 parse(Rfc3339, Unit) when is_binary(Rfc3339) andalso is_atom(Unit) ->
     Str = erlang:binary_to_list(Rfc3339),
     calendar:rfc3339_to_system_time(Str, [{unit, Unit}]).
