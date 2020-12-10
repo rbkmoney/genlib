@@ -131,6 +131,15 @@ uuid_to_bstring_test_() ->
         )
     ].
 
+-spec bstring_to_uuid_test_() -> [testcase()].
+bstring_to_uuid_test_() ->
+    [
+        ?_assertEqual(
+            <<149, 42, 248, 95, 6, 225, 73, 134, 181, 94, 187, 227, 149, 26, 47, 74>>,
+            genlib_format:bstring_to_uuid(<<"952af85f-06e1-4986-b55e-bbe3951a2f4a">>)
+        )
+    ].
+
 -spec parse_timespan_test_() -> [testcase()].
 parse_timespan_test_() ->
     [

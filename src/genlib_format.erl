@@ -27,6 +27,7 @@
 -export([parse_timespan/1]).
 
 -export([uuid_to_bstring/1]).
+-export([bstring_to_uuid/1]).
 
 %%
 
@@ -308,3 +309,8 @@ unit_factor(Other) ->
 uuid_to_bstring(<<F1:4/bytes, F2:2/bytes, F3:2/bytes, F4:2/bytes, F5:6/bytes>>) ->
     [F01, F02, F03, F04, F05] = [binary_to_hex(F, false) || F <- [F1, F2, F3, F4, F5]],
     <<F01/binary, "-", F02/binary, "-", F03/binary, "-", F04/binary, "-", F05/binary>>.
+
+-spec bstring_to_uuid(Value :: binary()) -> uuid().
+bstring_to_uuid(<<F1:8/binary, $-, F2:4/binary, $-, F3:4/binary, $-, F4:4/binary, $-, F5:12/binary>>) ->
+    [F01, F02, F03, F04, F05] = [hex_to_binary(F) || F <- [F1, F2, F3, F4, F5]],
+    <<F01/binary, F02/binary, F03/binary, F04/binary, F05/binary>>.
