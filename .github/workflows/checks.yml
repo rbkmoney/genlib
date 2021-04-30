@@ -1,0 +1,33 @@
+name: Erlang CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    container:
+      image: erlang:22
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fetch Deps
+      run: make get_deps
+    - name: Compile
+      run: make compile
+    - name: Run Xref
+      run: make xref
+    - name: Run Dialyzer
+      run: make dialyze
+    - name: Run erlfmt
+      run: make check_format
+    - name: Run linter
+      run: make lint
+    - name: Run tests (eunit, proper)
+      run: make test

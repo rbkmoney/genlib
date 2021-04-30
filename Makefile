@@ -1,8 +1,11 @@
 REBAR ?= $(shell which rebar3 2>/dev/null || which ./rebar3)
 
-.PHONY: all compile dc test clean distclean dialyze check_format format
+.PHONY: all get_deps compile dc test clean distclean dialyze check_format format
 
 all: compile
+
+get_deps:
+	$(REBAR) get-deps
 
 compile:
 	$(REBAR) compile
@@ -21,6 +24,9 @@ xref:
 
 dialyze:
 	$(REBAR) dialyzer
+
+lint:
+	$(REBAR) lint
 
 check_format:
 	$(REBAR) fmt -c
