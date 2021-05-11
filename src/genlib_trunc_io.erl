@@ -534,7 +534,7 @@ test() ->
 
 -spec test(atom(), atom()) -> ok.
 test(Mod, Func) ->
-    Simple_items = [
+    SimpleItems = [
         atom,
         1234,
         1234.0,
@@ -560,7 +560,7 @@ test(Mod, Func) ->
         end
     end,
 
-    lists:foreach(G, Simple_items),
+    lists:foreach(G, SimpleItems),
 
     Tuples = [
         {1, 2, 3, a, b, c},
