@@ -121,12 +121,12 @@ to_case(Case = upper, <<C, Rest/binary>>, Acc) ->
 to_snakecase(S) ->
     snake_case(l, S, <<>>).
 
--define(is_lower(C), (C >= $a andalso C =< $z)).
--define(is_upper(C), (C >= $A andalso C =< $Z)).
+-define(IS_LOWER(C), (C >= $a andalso C =< $z)).
+-define(IS_UPPER(C), (C >= $A andalso C =< $Z)).
 
-snake_case(l, <<L, U, Rest/binary>>, A) when ?is_lower(L), ?is_upper(U) ->
+snake_case(l, <<L, U, Rest/binary>>, A) when ?IS_LOWER(L), ?IS_UPPER(U) ->
     snake_case(u, Rest, <<A/binary, L, $_, (to_lower_char(U))>>);
-snake_case(u, <<U, L, Rest/binary>>, A) when ?is_upper(U), ?is_lower(L) ->
+snake_case(u, <<U, L, Rest/binary>>, A) when ?IS_UPPER(U), ?IS_LOWER(L) ->
     snake_case(l, Rest, <<A/binary, $_, (to_lower_char(U)), L>>);
 snake_case(M, <<C, Rest/binary>>, A) when C < 128 ->
     snake_case(M, Rest, <<A/binary, (to_lower_char(C))>>);
