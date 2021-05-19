@@ -25,53 +25,53 @@
 
 %%
 
--define(is_posint(V), (is_integer(V) andalso V > 0)).
--define(is_retries(V), (V =:= infinity orelse ?is_posint(V))).
--define(is_max_total_timeout(V), (is_integer(V) andalso V >= 0)).
+-define(IS_POSINT(V), (is_integer(V) andalso V > 0)).
+-define(IS_RETRIES(V), (V =:= infinity orelse ?IS_POSINT(V))).
+-define(IS_MAX_TOTAL_TIMEOUT(V), (is_integer(V) andalso V >= 0)).
 
 -spec linear(retries_num() | {max_total_timeout, pos_integer()}, pos_integer()) -> strategy().
 linear(Retries, Timeout) when
-    ?is_retries(Retries) andalso
-        ?is_posint(Timeout)
+    ?IS_RETRIES(Retries) andalso
+        ?IS_POSINT(Timeout)
 ->
     {linear, Retries, Timeout};
 linear(Retries = {max_total_timeout, MaxTotalTimeout}, Timeout) when
-    ?is_max_total_timeout(MaxTotalTimeout) andalso
-        ?is_posint(Timeout)
+    ?IS_MAX_TOTAL_TIMEOUT(MaxTotalTimeout) andalso
+        ?IS_POSINT(Timeout)
 ->
     {linear, compute_retries(linear, Retries, Timeout), Timeout}.
 
 -spec exponential(retries_num() | {max_total_timeout, pos_integer()}, number(), pos_integer()) -> strategy().
 exponential(Retries, Factor, Timeout) when
-    ?is_posint(Timeout) andalso
+    ?IS_POSINT(Timeout) andalso
         Factor > 0
 ->
     exponential(Retries, Factor, Timeout, infinity).
 
 -spec exponential(retries_num() | {max_total_timeout, pos_integer()}, number(), pos_integer(), timeout()) -> strategy().
 exponential(Retries, Factor, Timeout, MaxTimeout) when
-    ?is_retries(Retries) andalso
-        ?is_posint(Timeout) andalso
+    ?IS_RETRIES(Retries) andalso
+        ?IS_POSINT(Timeout) andalso
         Factor > 0 andalso
-        (MaxTimeout =:= infinity orelse ?is_posint(MaxTimeout))
+        (MaxTimeout =:= infinity orelse ?IS_POSINT(MaxTimeout))
 ->
     {exponential, Retries, Factor, Timeout, MaxTimeout};
 exponential(Retries = {max_total_timeout, MaxTotalTimeout}, Factor, Timeout, MaxTimeout) when
-    ?is_max_total_timeout(MaxTotalTimeout) andalso
-        ?is_posint(Timeout) andalso
+    ?IS_MAX_TOTAL_TIMEOUT(MaxTotalTimeout) andalso
+        ?IS_POSINT(Timeout) andalso
         Factor > 0 andalso
-        (MaxTimeout =:= infinity orelse ?is_posint(MaxTimeout))
+        (MaxTimeout =:= infinity orelse ?IS_POSINT(MaxTimeout))
 ->
     {exponential, compute_retries(exponential, Retries, {Factor, Timeout, MaxTimeout}), Factor, Timeout, MaxTimeout}.
 
 -spec intervals([pos_integer(), ...]) -> strategy().
-intervals(Array = [Timeout | _]) when ?is_posint(Timeout) ->
+intervals(Array = [Timeout | _]) when ?IS_POSINT(Timeout) ->
     {array, Array}.
 
 -spec timecap(MaxTimeToSpend :: timeout(), strategy()) -> strategy().
 timecap(infinity, Strategy) ->
     Strategy;
-timecap(MaxTimeToSpend, Strategy) when ?is_posint(MaxTimeToSpend) ->
+timecap(MaxTimeToSpend, Strategy) when ?IS_POSINT(MaxTimeToSpend) ->
     Now = now_ms(),
     {timecap, Now, Now + MaxTimeToSpend, Strategy};
 timecap(_, _Strategy) ->

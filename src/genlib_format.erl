@@ -114,17 +114,17 @@ format_datetime([], _Date, Bin) ->
 format_datetime([Format | Rest], DateTime, Bin) ->
     format_datetime(Rest, DateTime, format_datetime_part(Format, DateTime, Bin)).
 
--define(cat(Acc, E), <<Acc/binary, (E)/binary>>).
+-define(CAT(Acc, E), <<Acc/binary, (E)/binary>>).
 
-format_datetime_part(yyyy, {{Y, _, _}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(Y, 4));
-format_datetime_part(yy, {{Y, _, _}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(Y rem 100, 2));
-format_datetime_part(mm, {{_, M, _}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(M, 2));
-format_datetime_part(dd, {{_, _, D}, _}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(D, 2));
-format_datetime_part(h, {_, {H, _, _}}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(H, 2));
-format_datetime_part(m, {_, {_, M, _}}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(M, 2));
-format_datetime_part(s, {_, {_, _, S}}, Acc) -> ?cat(Acc, genlib_string:pad_numeric(S, 2));
-format_datetime_part(Bin, _DateTime, Acc) when is_binary(Bin) -> ?cat(Acc, Bin);
-format_datetime_part(String, _DateTime, Acc) when is_list(String) -> ?cat(Acc, list_to_binary(String));
+format_datetime_part(yyyy, {{Y, _, _}, _}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(Y, 4));
+format_datetime_part(yy, {{Y, _, _}, _}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(Y rem 100, 2));
+format_datetime_part(mm, {{_, M, _}, _}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(M, 2));
+format_datetime_part(dd, {{_, _, D}, _}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(D, 2));
+format_datetime_part(h, {_, {H, _, _}}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(H, 2));
+format_datetime_part(m, {_, {_, M, _}}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(M, 2));
+format_datetime_part(s, {_, {_, _, S}}, Acc) -> ?CAT(Acc, genlib_string:pad_numeric(S, 2));
+format_datetime_part(Bin, _DateTime, Acc) when is_binary(Bin) -> ?CAT(Acc, Bin);
+format_datetime_part(String, _DateTime, Acc) when is_list(String) -> ?CAT(Acc, list_to_binary(String));
 format_datetime_part(Char, _DateTime, Acc) when is_integer(Char) -> <<Acc/binary, Char>>.
 
 %%

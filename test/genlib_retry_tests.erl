@@ -6,7 +6,7 @@
 
 -spec test() -> _.
 
--define(assertNear(E, N, Eps), ?assert((E - Eps < N) and (N < E + Eps))).
+-define(ASSERT_NEAR(E, N, Eps), ?assert((E - Eps < N) and (N < E + Eps))).
 
 %%
 
@@ -47,11 +47,11 @@ timecap_test() ->
     ok = timer:sleep(N5 + 60),
     % ~ 440 / 1540
     finish = genlib_retry:next_step(R6),
-    ?assertNear(40, N1, 10),
-    ?assertNear(80, N2, 10),
-    ?assertNear(170, N3, 10),
-    ?assertNear(360, N4, 10),
-    ?assertNear(450, N5, 10),
+    ?ASSERT_NEAR(40, N1, 10),
+    ?ASSERT_NEAR(80, N2, 10),
+    ?ASSERT_NEAR(170, N3, 10),
+    ?ASSERT_NEAR(360, N4, 10),
+    ?ASSERT_NEAR(450, N5, 10),
     ok.
 
 -spec linear_compute_retries_test() -> _.

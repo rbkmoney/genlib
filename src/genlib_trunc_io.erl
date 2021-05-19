@@ -534,7 +534,7 @@ test() ->
 
 -spec test(atom(), atom()) -> ok.
 test(Mod, Func) ->
-    Simple_items = [
+    SimpleItems = [
         atom,
         1234,
         1234.0,
@@ -560,7 +560,7 @@ test(Mod, Func) ->
         end
     end,
 
-    lists:foreach(G, Simple_items),
+    lists:foreach(G, SimpleItems),
 
     Tuples = [
         {1, 2, 3, a, b, c},
@@ -629,7 +629,7 @@ atom_quoting_test() ->
     ?assertEqual("'Hello world'", lists:flatten(format("~p", ['Hello world'], 50))),
     ?assertEqual("hello_world", lists:flatten(format("~p", ['hello_world'], 50))),
     ?assertEqual("'node@127.0.0.1'", lists:flatten(format("~p", ['node@127.0.0.1'], 50))),
-    ?assertEqual("node@nohost", lists:flatten(format("~p", [node@nohost], 50))),
+    ?assertEqual("node@nohost", lists:flatten(format("~p", ['node@nohost'], 50))),
     ?assertEqual("abc123", lists:flatten(format("~p", [abc123], 50))),
     ok.
 
