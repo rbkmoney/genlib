@@ -17,6 +17,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Cache build
+      if: ${{ !env.ACT }}
+      id: cache-build
+      uses: actions/cache@v2
+      with:
+        path: "_build/default/"
+        key: ${{ runner.os }}-${{ hashFiles('rebar.lock') }}-build-default
     - name: Fetch Deps
       run: make get_deps
     - name: Compile
