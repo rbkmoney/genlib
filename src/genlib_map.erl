@@ -144,7 +144,7 @@ diff(Map, Since) ->
         Since
     ).
 
-%% @doc Like lists:foldl, but can be stopped amid the traversal of a map.
+%% @doc Like maps:fold, but can be stopped amid the traversal of a map.
 %% Function must return {cont, NewAcc} to continue folding the list, or {halt, FinalAcc} to stop immediately.
 -spec fold_while(fun((K, V, Acc) -> {cont, Acc} | {halt, Acc}), Acc, #{K => V}) -> Acc when
     K :: term(), V :: term(), Acc :: term().
