@@ -49,29 +49,37 @@ prop_orderless_equal() ->
         genlib_list:orderless_equal(List1, List2) == (lists:sort(List1) == lists:sort(List2))
     ).
 
--spec prop_group_by() -> proper:test().
-prop_group_by() ->
+-spec prop_group_by_has_same_values() -> proper:test().
+prop_group_by_has_same_values() ->
     ?FORALL(
         List,
         list(),
         begin
             Result = genlib_list:group_by(fun(X) -> X end, List),
             AllValues = lists:flatmap(fun(X) -> X end, maps:values(Result)),
-            SameValues = lists:sort(List) =:= lists:sort(AllValues),
 
-            CorrectlyGrouped =
-                maps:fold(
-                    fun
-                        (_, _, false) ->
-                            false;
-                        (Key, Values, true) ->
-                            Filtered = lists:filter(fun(K) -> K =:= Key end, List),
-                            genlib_list:orderless_equal(Values, Filtered)
-                    end,
-                    true,
-                    Result
-                ),
+            lists:sort(List) =:= lists:sort(AllValues)
+        end
+    ).
 
-            SameValues and CorrectlyGrouped
+-spec prop_group_by_groups_correctly() -> proper:test().
+prop_group_by_groups_correctly() ->
+    ?FORALL(
+        List,
+        list(),
+        begin
+            Result = genlib_list:group_by(fun(X) -> X end, List),
+
+            maps:fold(
+                fun
+                    (_, _, false) ->
+                        false;
+                    (Key, Values, true) ->
+                        Filtered = lists:filter(fun(K) -> K =:= Key end, List),
+                        genlib_list:orderless_equal(Values, Filtered)
+                end,
+                true,
+                Result
+            )
         end
     ).
