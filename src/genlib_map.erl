@@ -161,3 +161,21 @@ do_fold_while(Fun, Acc, Iter) ->
                 {cont, NextAcc} -> do_fold_while(Fun, NextAcc, NextIter)
             end
     end.
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+-spec test() -> _.
+
+-spec fold_while_does_nothing_for_empty_map_test() -> _.
+
+fold_while_does_nothing_for_empty_map_test() ->
+    genlib_map:fold_while(
+        fun(_, _, _) ->
+            throw(blow_up)
+        end,
+        true,
+        #{}
+    ).
+
+-endif.
