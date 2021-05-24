@@ -7,13 +7,10 @@ prop_wrap() ->
     ?FORALL(
         Term,
         term(),
-        case Term of
-            undefined ->
-                [] =:= genlib_list:wrap(Term);
-            List when is_list(List) ->
-                List =:= genlib_list:wrap(Term);
-            _ ->
-                [Term] =:= genlib_list:wrap(Term)
+        begin
+            Result = genlib_list:wrap(Term),
+            %% List must stay the same, anything else (except `undefined`) ­
+            (is_list(Term) and (Result == Term)) or is_list(Result)
         end
     ).
 
