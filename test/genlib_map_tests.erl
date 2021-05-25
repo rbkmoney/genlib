@@ -48,3 +48,13 @@ diff_test_() ->
         ?_assertEqual(#{this_is => 'undefined'}, genlib_map:diff(#{this_is => 'undefined'}, #{this_is => 'not'})),
         ?_assertEqual(#{this_is => 'not'}, genlib_map:diff(#{this_is => 'not'}, #{this_is => 'undefined'}))
     ].
+
+-spec fold_while_does_nothing_for_empty_map_test() -> _.
+fold_while_does_nothing_for_empty_map_test() ->
+    genlib_map:fold_while(
+        fun(_, _, _) ->
+            throw(blow_up)
+        end,
+        true,
+        #{}
+    ).

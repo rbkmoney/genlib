@@ -72,15 +72,3 @@ do_foldl_while(Fun, Acc, [Elem | Rest]) ->
 -spec orderless_equal(list(), list()) -> boolean().
 orderless_equal(List1, List2) ->
     (List1 -- List2) =:= (List2 -- List1).
-
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
-
--spec test() -> _.
-
--spec wrap_empty_list_for_undefined_test() -> _.
-
-wrap_empty_list_for_undefined_test() ->
-    ?assertEqual(genlib_list:wrap(undefined), []).
-
--endif.
