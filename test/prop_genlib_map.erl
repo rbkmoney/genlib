@@ -6,11 +6,7 @@
 prop_fold_while() ->
     ?FORALL(
         Map,
-        ?SUCHTHAT(
-            NonEmptyMap,
-            ?LET(KVList, list({term(), term()}), maps:from_list(KVList)),
-            map_size(NonEmptyMap) /= 0
-        ),
+        ?LET(KVList, non_empty(list({term(), term()})), maps:from_list(KVList)),
         begin
             RandomId = rand:uniform(map_size(Map)),
             {RandomKey, RandomValue} = lists:nth(RandomId, maps:to_list(Map)),
