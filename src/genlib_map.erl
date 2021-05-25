@@ -17,6 +17,7 @@
 -export([binarize/1]).
 -export([binarize/2]).
 -export([diff/2]).
+-export([fold_while/3]).
 
 %%
 
@@ -142,3 +143,21 @@ diff(Map, Since) ->
         Map,
         Since
     ).
+
+%% @doc Like maps:fold, but can be stopped amid the traversal of a map.
+%% Function must return {cont, NewAcc} to continue folding the list, or {halt, FinalAcc} to stop immediately.
+-spec fold_while(fun((K, V, Acc) -> {cont, Acc} | {halt, Acc}), Acc, #{K => V}) -> Acc when
+    K :: term(), V :: term(), Acc :: term().
+fold_while(Fun, Acc, Map) when is_function(Fun, 3) and is_map(Map) ->
+    do_fold_while(Fun, Acc, maps:iterator(Map)).
+
+do_fold_while(Fun, Acc, Iter) ->
+    case maps:next(Iter) of
+        none ->
+            Acc;
+        {K, V, NextIter} ->
+            case Fun(K, V, Acc) of
+                {halt, FinalAcc} -> FinalAcc;
+                {cont, NextAcc} -> do_fold_while(Fun, NextAcc, NextIter)
+            end
+    end.
