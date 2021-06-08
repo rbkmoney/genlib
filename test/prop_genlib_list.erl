@@ -41,6 +41,35 @@ prop_foldl_while() ->
         end
     ).
 
+-spec prop_find() -> proper:test().
+prop_find() ->
+    ?FORALL(
+        List,
+        ?SUCHTHAT(List, list(), List /= []),
+        begin
+            Length = length(List),
+            Index = rand:uniform(Length),
+            Value = lists:nth(Index, List),
+            IndexedList = lists:zip(lists:seq(1, Length), List),
+
+            Pred = fun({_Idx, X}) -> X =:= Value end,
+
+            Actual = genlib_list:find(Pred, IndexedList),
+            Expected = genlib_list:foldl_while(
+                fun(E, Acc) ->
+                    case Pred(E) of
+                        true -> {halt, {ok, E}};
+                        false -> {cont, Acc}
+                    end
+                end,
+                error,
+                IndexedList
+            ),
+
+            Actual =:= Expected
+        end
+    ).
+
 -spec prop_orderless_equal() -> proper:test().
 prop_orderless_equal() ->
     ?FORALL(

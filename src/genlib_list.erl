@@ -6,6 +6,7 @@
 -export([wrap/1]).
 -export([group_by/2]).
 -export([foldl_while/3]).
+-export([find/2]).
 -export([orderless_equal/2]).
 
 %%
@@ -67,6 +68,19 @@ do_foldl_while(Fun, Acc, [Elem | Rest]) ->
             do_foldl_while(Fun, NextAcc, Rest);
         {halt, FinalAcc} ->
             FinalAcc
+    end.
+
+%% @doc Search for the first element in the list that satisfies Pred.
+%% If such element is found, return `{ok, Elem}`, and `error` otherwise
+-spec find(fun((T) -> boolean()), list(T)) -> {ok, T} | error when T :: term().
+find(_, []) ->
+    error;
+find(Pred, [Elem | Rest]) ->
+    case Pred(Elem) of
+        true ->
+            {ok, Elem};
+        false ->
+            find(Pred, Rest)
     end.
 
 -spec orderless_equal(list(), list()) -> boolean().
