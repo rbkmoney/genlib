@@ -24,19 +24,11 @@
 
 %% @doc Map over range
 -spec map(fun((integer()) -> T), t()) -> [T].
-map(Fun, Range) when is_function(Fun, 1), ?IS_RANGE(Range) ->
-    {From, To, Step} = to_extended_range(Range),
-    lists:reverse(
-        do_foldl(
-            fun(Idx, Acc) ->
-                [Fun(Idx) | Acc]
-            end,
-            [],
-            From,
-            To,
-            Step
-        )
-    );
+map(Fun0, Range) when is_function(Fun0, 1) ->
+    Fun1 = fun(Idx, Acc) ->
+        [Fun0(Idx) | Acc]
+    end,
+    lists:reverse(foldl(Fun1, [], Range));
 map(_, _) ->
     error(badarg).
 
