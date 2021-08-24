@@ -5,17 +5,17 @@
 -spec prop_map() -> proper:test().
 prop_map() ->
     ?FORALL(
-        Range = {From, To, Step},
+        Range,
         range(),
-        lists_seq(From, To, Step) =:= genlib_range:map(fun identity/1, Range)
+        lists_seq(Range) =:= genlib_range:map(fun identity/1, Range)
     ).
 
 -spec prop_foldl() -> proper:test().
 prop_foldl() ->
     ?FORALL(
-        Range = {From, To, Step},
+        Range,
         range(),
-        lists:foldl(fun sum/2, 0, lists_seq(From, To, Step)) =:= genlib_range:foldl(fun sum/2, 0, Range)
+        lists:foldl(fun sum/2, 0, lists_seq(Range)) =:= genlib_range:foldl(fun sum/2, 0, Range)
     ).
 
 identity(X) ->
@@ -25,15 +25,22 @@ sum(A, B) ->
     A + B.
 
 %% Workaround missing if statements in implementation
-lists_seq(From, To, Step) when From < To, Step < 0 ->
+lists_seq({From, To}) when From =< To ->
+    lists:seq(From, To);
+lists_seq({From, To}) when From > To ->
     [];
-lists_seq(From, To, Step) when From > To, Step > 0 ->
+lists_seq({From, To, Step}) when From < To, Step < 0 ->
     [];
-lists_seq(From, To, Step) ->
+lists_seq({From, To, Step}) when From > To, Step > 0 ->
+    [];
+lists_seq({From, To, Step}) ->
     lists:seq(From, To, Step).
 
 range() ->
-    {integer(), integer(), non_zero_integer()}.
+    oneof([
+           {integer(), integer()},
+           {integer(), integer(), non_zero_integer()}
+          ]).
 
 non_zero_integer() ->
     oneof([
