@@ -21,10 +21,10 @@ prop_foldl() ->
 -spec prop_to_list() -> proper:test().
 prop_to_list() ->
     ?FORALL(
-       Range,
-       range(),
-       lists_seq(Range) =:= genlib_range:to_list(Range)
-      ).
+        Range,
+        range(),
+        lists_seq(Range) =:= genlib_range:to_list(Range)
+    ).
 
 identity(X) ->
     X.
@@ -46,9 +46,9 @@ lists_seq({From, To, Step}) ->
 
 range() ->
     oneof([
-           {integer(), integer()},
-           {integer(), integer(), non_zero_integer()}
-          ]).
+        {integer(), integer()},
+        {integer(), integer(), non_zero_integer()}
+    ]).
 
 non_zero_integer() ->
     oneof([

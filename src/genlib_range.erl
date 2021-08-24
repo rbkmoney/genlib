@@ -57,7 +57,7 @@ to_list(Range) ->
         From < To, Step < 0 -> [];
         From > To, Step > 0 -> [];
         true -> lists:seq(From, To, Step)
-        end.
+    end.
 
 %%
 %% Internals
