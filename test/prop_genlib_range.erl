@@ -18,6 +18,14 @@ prop_foldl() ->
         lists:foldl(fun sum/2, 0, lists_seq(Range)) =:= genlib_range:foldl(fun sum/2, 0, Range)
     ).
 
+-spec prop_to_list() -> proper:test().
+prop_to_list() ->
+    ?FORALL(
+       Range,
+       range(),
+       lists_seq(Range) =:= genlib_range:to_list(Range)
+      ).
+
 identity(X) ->
     X.
 

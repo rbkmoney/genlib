@@ -7,6 +7,7 @@
 
 -export([map/2]).
 -export([foldl/3]).
+-export([to_list/1]).
 
 -type bound() :: integer().
 -type step() :: neg_integer() | pos_integer().
@@ -46,6 +47,17 @@ foldl(Fun, Acc, Range) when is_function(Fun, 2), ?IS_RANGE(Range) ->
     do_foldl(Fun, Acc, From, To, Step);
 foldl(_, _, _) ->
     error(badarg).
+
+%% @doc Convert range to list
+%% Somewhat similar to lists:seq/2,3, but covers all possible valid variations of arguments
+-spec to_list(t()) -> [integer()].
+to_list(Range) ->
+    {From, To, Step} = to_extended_range(Range),
+    if
+        From < To, Step < 0 -> [];
+        From > To, Step > 0 -> [];
+        true -> lists:seq(From, To, Step)
+        end.
 
 %%
 %% Internals
