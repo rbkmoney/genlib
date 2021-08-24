@@ -16,10 +16,17 @@
 -define(IS_RANGE(R),
     ((is_integer(element(1, R))) andalso
         (is_integer(element(2, R))) andalso
-        ((tuple_size(R) == 2) orelse
-            (tuple_size(R) == 3 andalso
-                is_integer(element(3, R)) andalso
-                element(3, R) /= 0)))
+        (?IS_SIMPLE_RANGE(R) orelse ?IS_RANGE_WITH_STEP(R)))
+).
+
+-define(IS_SIMPLE_RANGE(R),
+    (tuple_size(R) == 2)
+).
+
+-define(IS_RANGE_WITH_STEP(R),
+    (tuple_size(R) == 3 andalso
+        is_integer(element(3, R)) andalso
+        element(3, R) /= 0)
 ).
 
 %% @doc Map over range
