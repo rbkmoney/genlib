@@ -240,11 +240,13 @@ binary_to_hex(V, false) ->
 
 binary_to_hex_(V, A) ->
     <<
-        <<(if
+        <<
+            (if
                 C >= 10 -> C + A - 10;
                 true -> C + $0
-            end)>>
-        || <<C:4>> <= V
+            end)
+        >>
+     || <<C:4>> <= V
     >>.
 
 -spec hex_to_binary(binary()) -> binary().
