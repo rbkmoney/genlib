@@ -18,6 +18,7 @@
 -export([binarize/2]).
 -export([diff/2]).
 -export([fold_while/3]).
+-export([search/2]).
 
 %%
 
@@ -150,6 +151,20 @@ diff(Map, Since) ->
     K :: term(), V :: term(), Acc :: term().
 fold_while(Fun, Acc, Map) when is_function(Fun, 3) and is_map(Map) ->
     do_fold_while(Fun, Acc, maps:iterator(Map)).
+
+%% @doc Like lists:search, but for maps to reduce memory pressure
+%% (comparing to naive implementation with conversion to list)
+-spec search(fun((K, V) -> boolean()), #{K => V}) -> false | {value, K, V}.
+search(Fun, Map) when is_function(Fun, 2), is_map(Map) ->
+    do_search(Fun, maps:next(maps:iterator(Map))).
+
+do_search(_Fun, none) ->
+    false;
+do_search(Fun, {Key, Value, Iter}) ->
+    case Fun(Key, Value) of
+        true -> {value, Key, Value};
+        false -> do_search(Fun, maps:next(Iter))
+    end.
 
 do_fold_while(Fun, Acc, Iter) ->
     case maps:next(Iter) of
