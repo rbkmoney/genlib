@@ -36,7 +36,7 @@ prop_search_found() ->
                     Map
                 ),
 
-            {value, RandomKey, RandomValue} =:= Result
+            {RandomKey, RandomValue} =:= Result
         end
     ).
 

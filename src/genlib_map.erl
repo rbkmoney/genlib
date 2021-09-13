@@ -152,20 +152,6 @@ diff(Map, Since) ->
 fold_while(Fun, Acc, Map) when is_function(Fun, 3) and is_map(Map) ->
     do_fold_while(Fun, Acc, maps:iterator(Map)).
 
-%% @doc Like lists:search, but for maps to reduce memory pressure
-%% (comparing to naive implementation with conversion to list)
--spec search(fun((K, V) -> boolean()), #{K => V}) -> false | {value, K, V}.
-search(Fun, Map) when is_function(Fun, 2), is_map(Map) ->
-    do_search(Fun, maps:next(maps:iterator(Map))).
-
-do_search(_Fun, none) ->
-    false;
-do_search(Fun, {Key, Value, Iter}) ->
-    case Fun(Key, Value) of
-        true -> {value, Key, Value};
-        false -> do_search(Fun, maps:next(Iter))
-    end.
-
 do_fold_while(Fun, Acc, Iter) ->
     case maps:next(Iter) of
         none ->
@@ -175,4 +161,18 @@ do_fold_while(Fun, Acc, Iter) ->
                 {halt, FinalAcc} -> FinalAcc;
                 {cont, NextAcc} -> do_fold_while(Fun, NextAcc, NextIter)
             end
+    end.
+
+%% @doc Like lists:search, but for maps to reduce memory pressure
+%% (comparing to naive implementation with conversion to list)
+-spec search(fun((K, V) -> boolean()), #{K => V}) -> false | {K, V}.
+search(Fun, Map) when is_function(Fun, 2), is_map(Map) ->
+    do_search(Fun, maps:next(maps:iterator(Map))).
+
+do_search(_Fun, none) ->
+    false;
+do_search(Fun, {Key, Value, Iter}) ->
+    case Fun(Key, Value) of
+        true -> {Key, Value};
+        false -> do_search(Fun, maps:next(Iter))
     end.
