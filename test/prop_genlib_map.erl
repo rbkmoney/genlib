@@ -57,6 +57,63 @@ prop_search_not_found() ->
         end
     ).
 
+-spec prop_zipfold() -> proper:test().
+prop_zipfold() ->
+    ?FORALL(
+        [Left, Right],
+        [map(), map()],
+        begin
+            CommonKeys = maps_common_keys(Left, Right),
+
+            Actual =
+                genlib_map:zipfold(
+                    fun(Key, LValue, RValue, Acc) -> Acc#{Key => {LValue, RValue}} end,
+                    #{},
+                    Left,
+                    Right
+                ),
+
+            Expected =
+                maps_merge_with(
+                    fun(_Key, LValue, RValue) -> {LValue, RValue} end,
+                    Left,
+                    Right
+                ),
+
+            Actual =:= maps:with(CommonKeys, Expected)
+        end
+    ).
+
+-if(?OTP_RELEASE >= 24).
+
+maps_merge_with(Combiner, Left, Right) ->
+    maps:merge_with(Combiner, Left, Right).
+
+-else.
+
+maps_merge_with(Combiner, Left, Right) ->
+    CommonMerged =
+        lists:foldl(
+            fun(Key, Acc) ->
+                Acc#{Key => Combiner(Key, maps:get(Key, Left), maps:get(Key, Right))}
+            end,
+            #{},
+            maps_common_keys(Left, Right)
+        ),
+
+    maps:merge(maps:merge(Left, Right), CommonMerged).
+
+%% END -if(?OTP_RELEASE >= 24).
+-endif.
+
+maps_common_keys(LeftMap, RightMap) ->
+    sets:to_list(
+        sets:intersection(
+            sets:from_list(maps:keys(LeftMap)),
+            sets:from_list(maps:keys(RightMap))
+        )
+    ).
+
 map() ->
     ?LET(KVList, list({term(), term()}), maps:from_list(KVList)).
 

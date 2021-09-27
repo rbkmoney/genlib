@@ -19,6 +19,7 @@
 -export([diff/2]).
 -export([fold_while/3]).
 -export([search/2]).
+-export([zipfold/4]).
 
 %%
 
@@ -176,3 +177,25 @@ do_search(Fun, {Key, Value, Iter}) ->
         true -> {Key, Value};
         false -> do_search(Fun, maps:next(Iter))
     end.
+
+%% @doc Fold two maps "joining" them by key.
+%% NOTE: If a key-value exists only in one map, this pair is ignored altogether
+-spec zipfold(
+    fun((K, V1, V2, A) -> A),
+    InitAcc :: A,
+    #{K => V1},
+    #{K => V2}
+) -> A.
+zipfold(Fun, Acc, M1, M2) ->
+    maps:fold(
+        fun(Key, V1, AccIn) ->
+            case maps:find(Key, M2) of
+                {ok, V2} ->
+                    Fun(Key, V1, V2, AccIn);
+                error ->
+                    AccIn
+            end
+        end,
+        Acc,
+        M1
+    ).
